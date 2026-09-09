@@ -1,0 +1,26 @@
+VetRay — Veterinary Clinical Intelligence Platform
+===================================================
+
+Detected stack:
+- Framework: React 18 + TypeScript
+- Build tool: Vite 5
+- Styling: Tailwind CSS 3
+- Icons: lucide-react
+- Backend/Database: Supabase (Postgres + Auth + Edge Functions)
+- Language/i18n: Custom i18n module (src/lib/i18n.ts) — supports fa, en, ar, tr, fr, es, de
+- Reasoning engine: Custom rules engine (src/engine/reasoningEngine.ts)
+
+Architecture notes:
+- Frontend is a Vite SPA, no Next.js / no pages/api routes.
+- Database schema lives in supabase/migrations/ (Supabase SQL, not Prisma).
+- One deployed Supabase Edge Function: supabase/functions/admin-notify/index.ts
+  - Reads RESEND_API_KEY and ADMIN_NOTIFICATION_EMAIL from Supabase secrets.
+  - Sends an admin email via Resend when a new user registers.
+- Auth uses Supabase email OTP (signInWithOtp / verifyOtp), not a custom mailer.
+
+Resend integration:
+- File: supabase/functions/admin-notify/index.ts
+- Configured via Supabase Edge Function secrets (server-side only):
+    RESEND_API_KEY           — Resend API key (server secret, never in frontend)
+    ADMIN_NOTIFICATION_EMAIL — inbox to receive new-registration notices
+- No client-side mailer exists by design; all email sending is server-side.
