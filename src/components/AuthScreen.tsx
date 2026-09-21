@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import type { Lang } from '@/types';
 import { tr } from '@/lib/i18n';
-import { useAuth } from '@/lib/auth';
+import { canUseLocalDemo, useAuth } from '@/lib/auth';
 import { Mail, KeyRound, ArrowRight, ArrowLeft, RefreshCw, AlertCircle, Brain, Shield } from 'lucide-react';
 
 export function AuthScreen({ lang, onAuthSuccess, onBack }: { lang: Lang; onAuthSuccess: () => void; onBack: () => void }) {
-  const { signInWithOtp, verifyOtp, ensureProfile } = useAuth();
+  const { signInWithOtp, verifyOtp, enterDemoMode, ensureProfile } = useAuth();
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -119,6 +119,15 @@ export function AuthScreen({ lang, onAuthSuccess, onBack }: { lang: Lang; onAuth
                 {loading ? tr('loading', lang) : tr('sendCode', lang)}
                 {!loading && <ForwardIcon className="w-4 h-4" />}
               </button>
+              {canUseLocalDemo && (
+                <button
+                  type="button"
+                  onClick={() => { enterDemoMode(); onAuthSuccess(); }}
+                  className="w-full mt-3 border border-amber-400/50 text-amber-300 hover:bg-amber-400/10 py-3 rounded-xl font-medium transition"
+                >
+                  Local Demo
+                </button>
+              )}
             </>
           )}
 
@@ -139,7 +148,7 @@ export function AuthScreen({ lang, onAuthSuccess, onBack }: { lang: Lang; onAuth
                   onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
                   onKeyDown={e => e.key === 'Enter' && handleVerify()}
                   placeholder="000000"
-                  className="w-full pl-11 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white text-center text-2xl tracking-widest placeholder-slate-600 focus:outline-none focus:border-teal-400 focus:bg-white/15 transition"
+                  className="w-full pl-11 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white text-center text-2xl tracking-widest placeholder-slate-600 focus:outline-none focus:border-teal-400 transition"
                 />
               </div>
               {error && (
