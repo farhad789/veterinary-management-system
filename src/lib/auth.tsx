@@ -10,12 +10,27 @@ interface AuthContextValue {
   daysRemaining: number;
   signInWithOtp: (email: string, lang: Lang) => Promise<{ error: string | null }>;
   verifyOtp: (email: string, token: string) => Promise<{ error: string | null }>;
+  enterDemoMode: () => void;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<{ error: string | null }>;
   ensureProfile: (lang: Lang) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+export const canUseLocalDemo = import.meta.env.DEV && typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+const demoUser: UserProfile = {
+  id: 'local-demo-user',
+  email: 'demo@localhost',
+  role: 'small_animal_vet',
+  preferredLang: 'en',
+  trialStartedAt: new Date().toISOString(),
+  trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  subscribed: false,
+  createdAt: new Date().toISOString(),
+};
 
 function mapNetworkError(lang: Lang, err: unknown): string {
   console.error('[Auth] Network error:', err);
@@ -31,228 +46,108 @@ function mapNetworkError(lang: Lang, err: unknown): string {
   return messages[lang] || messages.en;
 }
 
-async function notifyAdmin(email: string, role: string | null, lang: Lang, trialEnd: string): Promise<void> {
-  const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-notify`;
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  if (anonKey) {
-    headers['Authorization'] = `Bearer ${anonKey}`;
-  }
-  const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ email, role, language: lang, trialEnd }),
-  });
-  if (!response.ok) {
-    console.error('[Auth] Admin notify HTTP error:', response.status);
-  }
-}
-
 function mapAuthError(error: { message: string; status?: number }, lang: Lang): string {
   console.error('[Auth] Supabase error:', error.message, error.status);
   const msg = error.message.toLowerCase();
-  if (error.status === 429 || msg.includes('rate limit')) {
-    const m: Record<Lang, string> = {
-      fa: 'تعداد درخواست‌ها زیاد است. لطفاً چند دقیقه بعد دوباره تلاش کنید.',
-      en: 'Too many requests. Please try again in a few minutes.',
-      ar: 'طلبات كثيرة جداً. حاول مرة أخرى بعد بضع دقائق.',
-      tr: 'Çok fazla istek. Lütfen birkaç dakika sonra tekrar deneyin.',
-      fr: 'Trop de demandes. Réessayez dans quelques minutes.',
-      es: 'Demasiadas solicitudes. Intente de nuevo en unos minutos.',
-      de: 'Zu viele Anfragen. Bitte in wenigen Minuten erneut versuchen.',
-    };
-    return m[lang] || m.en;
-  }
-  if (msg.includes('failed to fetch') || msg.includes('network')) {
-    return mapNetworkError(lang, error);
-  }
-  if (msg.includes('invalid') && msg.includes('otp')) {
-    const m: Record<Lang, string> = {
-      fa: 'کد تأیید نامعتبر است. لطفاً دوباره تلاش کنید.',
-      en: 'Invalid verification code. Please try again.',
-      ar: 'رمز التحقق غير صالح. حاول مرة أخرى.',
-      tr: 'Doğrulama kodu geçersiz. Tekrar deneyin.',
-      fr: 'Code de vérification invalide. Réessayez.',
-      es: 'Código de verificación inválido. Intente de nuevo.',
-      de: 'Ungültiger Bestätigungscode. Bitte erneut versuchen.',
-    };
-    return m[lang] || m.en;
-  }
-  if (msg.includes('expired')) {
-    const m: Record<Lang, string> = {
-      fa: 'کد تأیید منقضی شده است. لطفاً کد جدید درخواست کنید.',
-      en: 'The verification code has expired. Please request a new code.',
-      ar: 'انتهت صلاحية رمز التحقق. اطلب رمزاً جديداً.',
-      tr: 'Doğrulama kodunun süresi doldu. Lütfen yeni kod isteyin.',
-      fr: 'Le code de vérification a expiré. Demandez un nouveau code.',
-      es: 'El código de verificación expiró. Solicite un nuevo código.',
-      de: 'Der Bestätigungscode ist abgelaufen. Bitte neuen Code anfordern.',
-    };
-    return m[lang] || m.en;
-  }
+  if (error.status === 429 || msg.includes('rate limit')) return 'Too many requests. Please try again in a few minutes.';
+  if (msg.includes('failed to fetch') || msg.includes('network')) return mapNetworkError(lang, error);
+  if (msg.includes('invalid') && msg.includes('otp')) return 'Invalid verification code. Please try again.';
+  if (msg.includes('expired')) return 'The verification code has expired. Please request a new code.';
   return error.message;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(false);
 
   const computeTrialState = (profile: UserProfile | null): { state: TrialState; days: number } => {
     if (!profile) return { state: 'trial_active', days: 0 };
     if (profile.subscribed) return { state: 'subscribed', days: 0 };
     if (!profile.trialEndsAt) return { state: 'trial_active', days: 7 };
-    const now = new Date();
-    const ends = new Date(profile.trialEndsAt);
-    const diffMs = ends.getTime() - now.getTime();
-    const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const days = Math.ceil((new Date(profile.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
     if (days <= 0) return { state: 'trial_expired', days: 0 };
     if (days <= 2) return { state: 'trial_expiring', days };
     return { state: 'trial_active', days };
   };
 
   const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-    if (error) return null;
-    if (!data) return null;
-    return {
-      id: data.id,
-      email: data.email,
-      role: data.role as UserRole | null,
-      preferredLang: (data.preferred_lang as Lang) || 'fa',
-      trialStartedAt: data.trial_started_at,
-      trialEndsAt: data.trial_ends_at,
-      subscribed: data.subscribed || false,
-      createdAt: data.created_at,
-    };
+    const { data, error } = await supabase.from('user_profiles').select('*').eq('id', userId).maybeSingle();
+    if (error || !data) return null;
+    return { id: data.id, email: data.email, role: data.role as UserRole | null, preferredLang: (data.preferred_lang as Lang) || 'fa', trialStartedAt: data.trial_started_at, trialEndsAt: data.trial_ends_at, subscribed: data.subscribed || false, createdAt: data.created_at };
   }, []);
 
   const ensureProfile = useCallback(async (lang: Lang) => {
+    if (isDemo) return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
     const existing = await fetchProfile(session.user.id);
-    if (existing) {
-      setUser(existing);
-      return;
-    }
+    if (existing) { setUser(existing); return; }
     const now = new Date();
     const trialEnd = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
-    const newProfile = {
-      id: session.user.id,
-      email: session.user.email || '',
-      role: null,
-      preferred_lang: lang,
-      trial_started_at: now.toISOString(),
-      trial_ends_at: trialEnd.toISOString(),
-      subscribed: false,
-      subscription_status: 'TRIAL_ACTIVE' as const,
-    };
+    const newProfile = { id: session.user.id, email: session.user.email || '', role: null, preferred_lang: lang, trial_started_at: now.toISOString(), trial_ends_at: trialEnd.toISOString(), subscribed: false, subscription_status: 'TRIAL_ACTIVE' as const };
     const { error } = await supabase.from('user_profiles').insert(newProfile);
-    if (!error) {
-      setUser({
-        id: newProfile.id,
-        email: newProfile.email,
-        role: null,
-        preferredLang: lang,
-        trialStartedAt: newProfile.trial_started_at,
-        trialEndsAt: newProfile.trial_ends_at,
-        subscribed: false,
-        createdAt: now.toISOString(),
-      });
-      notifyAdmin(newProfile.email, null, lang, newProfile.trial_ends_at).catch(err =>
-        console.error('[Auth] Admin notification failed:', err)
-      );
-    }
-  }, [fetchProfile]);
+    if (!error) setUser({ id: newProfile.id, email: newProfile.email, role: null, preferredLang: lang, trialStartedAt: newProfile.trial_started_at, trialEndsAt: newProfile.trial_ends_at, subscribed: false, createdAt: now.toISOString() });
+  }, [fetchProfile, isDemo]);
 
   useEffect(() => {
     let mounted = true;
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!mounted) return;
-      if (session?.user) {
-        const profile = await fetchProfile(session.user.id);
-        if (mounted) setUser(profile);
-      }
+      if (session?.user) { const profile = await fetchProfile(session.user.id); if (mounted) setUser(profile); }
       if (mounted) setLoading(false);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       (async () => {
-        if (session?.user) {
-          const profile = await fetchProfile(session.user.id);
-          if (mounted) setUser(profile);
-        } else {
-          if (mounted) setUser(null);
-        }
+        if (session?.user) { const profile = await fetchProfile(session.user.id); if (mounted) setUser(profile); }
+        else if (!isDemo && mounted) setUser(null);
         if (mounted) setLoading(false);
       })();
     });
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [fetchProfile]);
+    return () => { mounted = false; subscription.unsubscribe(); };
+  }, [fetchProfile, isDemo]);
 
-  const signInWithOtp = useCallback(async (email: string, lang: Lang): Promise<{ error: string | null }> => {
+  const signInWithOtp = useCallback(async (email: string, lang: Lang) => {
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { shouldCreateUser: true },
-      });
-      if (error) {
-        return { error: mapAuthError(error, lang) };
-      }
-      return { error: null };
-    } catch (err) {
-      return { error: mapNetworkError(lang, err) };
-    }
+      const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+      return { error: error ? mapAuthError(error, lang) : null };
+    } catch (err) { return { error: mapNetworkError(lang, err) }; }
   }, []);
 
-  const verifyOtp = useCallback(async (email: string, token: string): Promise<{ error: string | null }> => {
+  const verifyOtp = useCallback(async (email: string, token: string) => {
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token,
-        type: 'email',
-      });
-      if (error) {
-        return { error: mapAuthError(error, 'fa') };
-      }
-      return { error: null };
-    } catch (err) {
-      return { error: mapNetworkError('fa', err) };
-    }
+      const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
+      return { error: error ? mapAuthError(error, 'fa') : null };
+    } catch (err) { return { error: mapNetworkError('fa', err) }; }
+  }, []);
+
+  const enterDemoMode = useCallback(() => {
+    if (!canUseLocalDemo) return;
+    setIsDemo(true);
+    setUser({ ...demoUser });
+    setLoading(false);
   }, []);
 
   const signOut = useCallback(async () => {
+    if (isDemo) { setIsDemo(false); setUser(null); return; }
     await supabase.auth.signOut();
     setUser(null);
-  }, []);
+  }, [isDemo]);
 
-  const updateProfile = useCallback(async (updates: Partial<UserProfile>): Promise<{ error: string | null }> => {
+  const updateProfile = useCallback(async (updates: Partial<UserProfile>) => {
     if (!user) return { error: 'No user' };
+    if (isDemo) { setUser(prev => prev ? { ...prev, ...updates } : null); return { error: null }; }
     const dbUpdates: Record<string, unknown> = {};
     if (updates.role !== undefined) dbUpdates.role = updates.role;
     if (updates.preferredLang !== undefined) dbUpdates.preferred_lang = updates.preferredLang;
     if (updates.subscribed !== undefined) dbUpdates.subscribed = updates.subscribed;
     const { error } = await supabase.from('user_profiles').update(dbUpdates).eq('id', user.id);
-    if (!error) {
-      setUser(prev => prev ? { ...prev, ...updates } : null);
-    }
+    if (!error) setUser(prev => prev ? { ...prev, ...updates } : null);
     return { error: error?.message || null };
-  }, [user]);
+  }, [isDemo, user]);
 
   const { state: trialState, days: daysRemaining } = computeTrialState(user);
-
-  return (
-    <AuthContext.Provider value={{ user, loading, trialState, daysRemaining, signInWithOtp, verifyOtp, signOut, updateProfile, ensureProfile }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loading, trialState, daysRemaining, signInWithOtp, verifyOtp, enterDemoMode, signOut, updateProfile, ensureProfile }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextValue {
