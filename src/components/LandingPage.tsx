@@ -2,6 +2,7 @@ import type { Lang, UserRole } from '@/types';
 import { isRTL } from '@/types';
 import { tr } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
+import { DairyFarmerSection } from '@/components/DairyFarmerSection';
 import {
   Brain, Sparkles, Shield, Activity, Stethoscope, ClipboardList,
   Lightbulb, Zap, PawPrint, FileText, Syringe, FlaskConical,
@@ -117,6 +118,9 @@ export function LandingPage({ lang, onLogin, onTrial }: { lang: Lang; onLogin: (
           ))}
         </div>
       </section>
+
+      {/* Dairy farmers (coming soon) */}
+      <DairyFarmerSection lang={lang} />
 
       {/* Disclaimer */}
       <section className="max-w-5xl mx-auto px-4 py-12">
