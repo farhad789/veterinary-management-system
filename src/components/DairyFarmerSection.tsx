@@ -66,15 +66,24 @@ export function DairyFarmerSection({ lang }: { lang: Lang }) {
           </p>
         </div>
 
-        <a
-          href={INSTAGRAM_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-3 rounded-xl font-medium transition"
-        >
-          می‌خواهید زودتر خبردار شوید؟ در اینستاگرام پیام بدهید
-          <ChevronLeft className="w-5 h-5" />
-        </a>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href="/farmprofit/index.html"
+            className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 px-6 py-3 rounded-xl font-bold transition"
+          >
+            قیمت‌های امروز و ماشین‌حساب را ببینید
+            <ChevronLeft className="w-5 h-5" />
+          </a>
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-3 rounded-xl font-medium transition"
+          >
+            می‌خواهید زودتر خبردار شوید؟ در اینستاگرام پیام بدهید
+            <ChevronLeft className="w-5 h-5" />
+          </a>
+        </div>
       </div>
     </section>
   );
