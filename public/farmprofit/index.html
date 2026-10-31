@@ -22,6 +22,7 @@
       <nav class="nav" aria-label="بخش‌های صفحه">
         <a href="#prices">قیمت‌ها</a>
         <a href="#calc">ماشین‌حساب</a>
+        <a href="#ration">جیره‌ی من</a>
         <a href="#science">مرجع علمی</a>
         <a href="#limits">حدود کار</a>
       </nav>
@@ -134,6 +135,51 @@
       </div>
     </section>
 
+    <section class="band" id="ration" aria-labelledby="ra-h">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="ra-h">جیره‌ی خودتان را بنویسید</h2>
+          <p class="lede">اول نوع دام را انتخاب کنید و جیره‌ی فعلی‌تان را بنویسید. بعد خرج خوراک و بازده اقتصادی‌اش را می‌بینید و می‌گویید راضی هستید یا نه. هر گروه جداگانه حساب می‌شود. اطلاعاتی که وارد می‌کنید فقط در مرورگر شما می‌ماند.</p>
+        </div>
+        <div class="calc-grid">
+          <div class="calc-card">
+            <div class="fields">
+              <div class="field"><label for="ra-species">نوع دام</label>
+                <select class="input" id="ra-species"><option value="dairy">گاو شیری</option><option value="beef">گاو گوشتی (پرواری)</option><option value="sheep">گوسفند (بره‌ی پرواری)</option></select></div>
+              <div class="field"><label for="ra-perf" id="ra-perf-l">شیر هر گاو در روز (کیلوگرم)</label><input class="input" id="ra-perf" inputmode="decimal" autocomplete="off" /></div>
+              <div class="field"><label for="ra-price" id="ra-price-l">قیمت شیر (تومان بر کیلوگرم)</label><input class="input" id="ra-price" inputmode="decimal" autocomplete="off" placeholder="قیمت خودتان" /></div>
+              <div class="field"><label for="ra-head" id="ra-head-l">تعداد گاو شیرده</label><input class="input" id="ra-head" inputmode="decimal" autocomplete="off" /></div>
+            </div>
+            <div>
+              <h3>جیره‌ی هر رأس در روز</h3>
+              <p class="muted" style="font-size:.9rem">مقدار را به‌صورت خوراک تازه (همان‌طور که می‌خرید) وارد کنید. هیچ مقدار اولیه‌ای نمی‌گذاریم تا جیره‌ی واقعی شما نوشته شود.</p>
+            </div>
+            <div class="rows" id="ra-rows"></div>
+            <div><button type="button" class="btn btn--ghost btn--small" id="ra-add">افزودن نهاده</button></div>
+          </div>
+          <aside class="receipt" aria-live="polite" aria-label="نتیجه‌ی جیره‌ی شما">
+            <dl>
+              <div><dt>خرج خوراک هر رأس در روز</dt><dd id="ra-day">—</dd></div>
+              <div class="big"><dt id="ra-perkg-l">خرج خوراک هر کیلو</dt><dd id="ra-perkg">—</dd></div>
+              <div><dt id="ra-margin-l">درآمد منهای خوراک</dt><dd id="ra-margin">—</dd></div>
+              <div><dt>خرج خوراک کل گروه در روز</dt><dd id="ra-herd">—</dd></div>
+            </dl>
+            <p class="muted-on-ink" id="ra-kg"></p>
+            <div class="split" id="ra-split"></div>
+            <p class="warn">این عددها فقط اقتصاد جیره‌ای را نشان می‌دهند که خودتان نوشته‌اید. کافی یا سالم بودن آن را بررسی نمی‌کنند. برای آن به دامپزشک یا متخصص تغذیه‌ی گله‌تان تکیه کنید.</p>
+          </aside>
+        </div>
+        <div class="satisfy">
+          <h3>از این جیره راضی هستید؟</h3>
+          <div class="satisfy-btns">
+            <button type="button" class="btn btn--tag" id="ra-yes" aria-pressed="false">بله، راضی هستم</button>
+            <button type="button" class="btn btn--ghost" id="ra-no" aria-pressed="false">نه، راضی نیستم</button>
+          </div>
+          <div id="ra-answer" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
     <section class="band" id="science" aria-labelledby="sci-h">
       <div class="wrap">
         <div class="section-head">
@@ -197,5 +243,6 @@
 
   <noscript><p style="padding:1rem">برای دیدن قیمت‌ها و ماشین‌حساب، جاوااسکریپت مرورگر را روشن کنید.</p></noscript>
   <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/ration.js"></script>
 </body>
 </html>
