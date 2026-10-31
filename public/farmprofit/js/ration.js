@@ -2,6 +2,14 @@
    No nutrient requirement numbers live here. NASEM comparison is a later step and is
    shown as "not available" until each value is verified in the book. */
 import { META, PRODUCTS, ROWS, CALC_REFERENCE } from './data.js';
+/* feeds.js (NASEM feed library) is optional. It is licensed material that only exists in the private repo until
+   NASEM permits public use (docs/licensing.md). Without it the page falls back to the 5 priced products + own feeds. */
+let lib = null;
+try { lib = await import('./feeds.js'); } catch (e) { lib = null; }
+const HAS_NASEM = !!lib;
+const FEEDS = lib ? lib.FEEDS : PRODUCTS.map((p) => ({ id: p.id, n: p.name, c: 'market', t: '', dm: null, cp: null, ndf: null }));
+const FEED_CATEGORIES = lib ? lib.FEED_CATEGORIES : { market: 'نهاده‌های جدول قیمت' };
+const PRICE_MAP = lib ? lib.PRICE_MAP : Object.fromEntries(PRODUCTS.map((p) => [p.id, p.id]));
 
 const $ = (s, el = document) => el.querySelector(s);
 const fa = (n) => new Intl.NumberFormat('fa-IR').format(Math.round(n));
@@ -15,6 +23,7 @@ const toNum = (s) => {
   return Number.isFinite(v) && v >= 0 ? v : 0;
 };
 const rowById = (id) => ROWS.find((r) => r.id === id);
+const feedById = (id) => FEEDS.find((f) => f.id === id);
 const refPrice = (key) => Math.round(((rowById(CALC_REFERENCE[key]).min + rowById(CALC_REFERENCE[key]).max) / 2) / 10);
 
 /* One animal group at a time. Groups are never mixed. */
@@ -51,15 +60,32 @@ st.rows = [blank(), blank(), blank()];
 
 const root = $('#ration');
 if (root) {
-  const feedOpts = (sel) => `<option value="custom" ${sel === 'custom' ? 'selected' : ''}>نهاده‌ی خودم را می‌نویسم</option>`
-    + PRODUCTS.map((p) => `<option value="${p.id}" ${p.id === sel ? 'selected' : ''}>${p.name}، قیمت از جدول</option>`).join('');
+  const feedOpts = (sel) => {
+    const groups = Object.keys(FEED_CATEGORIES).map((c) => {
+      const items = FEEDS.filter((f) => f.c === c);
+      return `<optgroup label="${FEED_CATEGORIES[c]} (${fa(items.length)})">${items.map((f) => `<option value="${f.id}" ${f.id === sel ? 'selected' : ''}>${esc(f.n)}</option>`).join('')}</optgroup>`;
+    }).join('');
+    return `<option value="custom" ${sel === 'custom' ? 'selected' : ''}>نهاده‌ی خودم را می‌نویسم</option>${groups}`;
+  };
 
   const totals = () => {
     const sp = SPECIES[st.sp];
     const cost = st.rows.reduce((s, r) => s + r.kg * r.price, 0);
     const kg = st.rows.reduce((s, r) => s + r.kg, 0);
     const revenue = st.perf * st.price;
-    return { sp, cost, kg, revenue, perKg: st.perf > 0 ? cost / st.perf : null, margin: st.price > 0 && st.perf > 0 ? revenue - cost : null };
+    const known = st.rows.filter((r) => r.kg > 0 && feedById(r.key)?.dm != null);
+    const dmKg = known.reduce((a, r) => a + r.kg * feedById(r.key).dm / 100, 0);
+    const wavg = (k) => { const w = known.filter((r) => feedById(r.key)[k] != null); const d = w.reduce((a, r) => a + r.kg * feedById(r.key).dm / 100, 0); return d > 0 ? w.reduce((a, r) => a + r.kg * feedById(r.key).dm / 100 * feedById(r.key)[k], 0) / d : null; };
+    const unknown = st.rows.filter((r) => r.kg > 0 && r.key === 'custom').length;
+    return { sp, cost, kg, revenue, dmKg, cp: wavg('cp'), ndf: wavg('ndf'), unknown, perKg: st.perf > 0 ? cost / st.perf : null, margin: st.price > 0 && st.perf > 0 ? revenue - cost : null };
+  };
+
+  const feedNote = (r) => {
+    const f = feedById(r.key); if (!f) return '';
+    if (!HAS_NASEM) return `قیمت اولیه از جدول قیمت‌ها (${META.dateFa}) است و مربوط به استان مرکزی نیست. با قیمت خریدتان عوضش کنید.`;
+    const v = (x) => (x == null ? 'ثبت نشده' : `${fa1(x)}٪`);
+    const pm = PRICE_MAP[r.key] ? ` قیمت اولیه از جدول قیمت‌ها (${META.dateFa}) است و فقط انطباق تقریبی با «${PRODUCTS.find((p) => p.id === PRICE_MAP[r.key]).name}» دارد. استان مرکزی نیست؛ با قیمت خریدتان عوضش کنید.` : ' قیمت این نهاده در جدول ما نیست؛ قیمت خریدتان را بنویسید.';
+    return `NASEM: ماده خشک ${v(f.dm)}، پروتئین خام ${v(f.cp)} و NDF ${v(f.ndf)} (دو مورد آخر نسبت به ماده خشک).${pm}`;
   };
 
   function renderRows() {
@@ -74,10 +100,10 @@ if (root) {
         <div class="field"><label for="ra-g${i}">مقدار (کیلوگرم)</label><input class="input" id="ra-g${i}" inputmode="decimal" autocomplete="off" value="${r.kg ? fa1(r.kg) : ''}" placeholder="مثلاً ۴" /></div>
         <div class="field"><label for="ra-p${i}">قیمت (تومان بر کیلوگرم)</label><input class="input" id="ra-p${i}" inputmode="decimal" autocomplete="off" value="${r.price ? fa(r.price) : ''}" placeholder="قیمت خودتان" /></div>
         <button type="button" class="icon-btn" aria-label="حذف ردیف ${i + 1}">×</button>
-        ${r.key !== 'custom' ? `<p class="note">قیمت اولیه از جدول قیمت‌ها (${META.dateFa}) و مربوط به استان مرکزی نیست. با قیمت خریدتان عوضش کنید.</p>` : ''}`;
+        ${r.key !== 'custom' ? `<p class="note">${feedNote(r)}</p>` : ''}`;
       box.appendChild(el);
       $(`#ra-k${i}`, el).addEventListener('change', (e) => {
-        r.key = e.target.value; r.price = r.key === 'custom' ? 0 : refPrice(r.key); render(true);
+        r.key = e.target.value; r.price = PRICE_MAP[r.key] ? refPrice(PRICE_MAP[r.key]) : 0; render(true);
       });
       $(`#ra-g${i}`, el).addEventListener('input', (e) => { r.kg = toNum(e.target.value); render(); });
       $(`#ra-p${i}`, el).addEventListener('input', (e) => { r.price = toNum(e.target.value); render(); });
@@ -91,7 +117,7 @@ if (root) {
     const used = st.rows.filter((r) => r.kg > 0 && r.price > 0);
     if (!used.length || t.cost <= 0) { box.innerHTML = ''; return; }
     box.innerHTML = '<h4>سهم هر نهاده از خرج خوراک</h4>' + used
-      .map((r) => ({ n: r.key === 'custom' ? (r.name || `نهاده‌ی ${fa(st.rows.indexOf(r) + 1)}`) : PRODUCTS.find((p) => p.id === r.key).name, c: r.kg * r.price }))
+      .map((r) => ({ n: r.key === 'custom' ? (r.name || `نهاده‌ی ${fa(st.rows.indexOf(r) + 1)}`) : feedById(r.key).n, c: r.kg * r.price }))
       .sort((a, b) => b.c - a.c)
       .map((x) => { const pc = (x.c / t.cost) * 100;
         return `<div class="bar"><span>${esc(x.n)}</span><i style="--w:${pc.toFixed(1)}%"></i><b>${fa(pc)}٪</b></div>`; }).join('');
@@ -135,9 +161,17 @@ if (root) {
     $('#ra-margin').innerHTML = t.cost > 0 ? (t.margin === null ? money(null) : `${t.margin < 0 ? '−' : ''}${fa(Math.abs(t.margin))} <small>تومان${t.margin < 0 ? ' (زیان)' : ''}</small>`) : '—';
     $('#ra-herd').innerHTML = t.cost > 0 && st.head > 0 ? `${fa(t.cost * st.head)} <small>تومان</small>` : '—';
     $('#ra-kg').textContent = t.kg > 0 ? `${fa1(t.kg)} کیلوگرم خوراک تازه برای هر رأس در روز` : '';
+    $('#ra-dm').innerHTML = t.dmKg > 0 ? `${fa1(t.dmKg)} <small>کیلوگرم</small>` : '—';
+    $('#ra-cp').innerHTML = t.cp == null ? '—' : `${fa1(t.cp)}٪ <small>پروتئین خام</small>`;
+    $('#ra-ndf').innerHTML = t.ndf == null ? '—' : `${fa1(t.ndf)}٪ <small>NDF</small>`;
+    $('#ra-unk').textContent = t.unknown > 0 ? `${fa(t.unknown)} ردیف با نهاده‌ی خودتان در این میانگین‌ها حساب نشده است.` : '';
     renderSplit(t); renderAnswer();
   }
 
+  $('#ra-libnote').textContent = HAS_NASEM
+    ? `فهرست نهاده‌ها همان فهرست NASEM (${fa(FEEDS.length)} نهاده) است؛ نام‌ها به انگلیسی و مثل کتاب‌اند.`
+    : 'نهاده‌ی خودتان را با نام و قیمت بنویسید یا از ۵ نهاده‌ی جدول قیمت‌ها شروع کنید.';
+  if (!HAS_NASEM) ['#ra-dm', '#ra-cp', '#ra-ndf'].forEach((q) => { const d = $(q); (d.closest('div') || d).hidden = true; });
   $('#ra-species').addEventListener('change', (e) => {
     st.sp = e.target.value; st.sat = null; st.reasons.clear();
     st.rows = [blank(), blank(), blank()]; st.perf = 0; $('#ra-perf').value = '';
