@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FarmProfit International | What does a kg of milk cost you to feed?</title>
+  <meta name="description" content="Enter your ration and your local feed prices. See your feed cost per kg of milk or gain in your own currency, then decide: keep it, or ask for a ration review." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='8' width='26' height='16' rx='8' fill='%23ffc72c' stroke='%2315161b' stroke-width='2'/%3E%3Ccircle cx='10' cy='16' r='2.5' fill='%23f7f8f4' stroke='%2315161b' stroke-width='2'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@400;600;700;800&display=swap" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="intl">
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="#top" aria-label="FarmProfit International, top of page">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="8" width="26" height="16" rx="8" fill="#ffc72c" stroke="#15161b" stroke-width="2"/><circle cx="10" cy="16" r="2.5" fill="#f7f8f4" stroke="#15161b" stroke-width="2"/></svg>
+        <span>FarmProfit</span>
+      </a>
+      <nav class="nav" aria-label="Page sections">
+        <a href="#ration">Your ration</a>
+        <a href="#how">How it works</a>
+        <a href="index.html" lang="fa" dir="rtl">فارسی</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="band" id="intro">
+      <div class="wrap">
+        <div class="section-head">
+          <h1>What does a kilogram of milk cost you to feed?</h1>
+          <p class="lede">Feed is the biggest bill on a dairy or feedlot farm. Write your ration and your own local prices, see the cost in your currency, and decide: keep the ration, or ask a veterinarian to review it.</p>
+          <p class="muted">Built by Dr. Seyed Farhad Riazi, veterinarian, 12+ years of clinical work with livestock farmers. Phase 1 markets: Iraq, Türkiye, Afghanistan, Pakistan.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="band band--white" id="ration" aria-labelledby="ra-h">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="ra-h">Write your ration</h2>
+          <p class="lede">Pick your country and animals. Enter the amounts you feed per head per day, as bought (fresh weight), and the price you pay. Each animal group is calculated on its own. What you type stays in your browser.</p>
+        </div>
+        <div class="calc-grid">
+          <div class="calc-card">
+            <div class="fields">
+              <div class="field"><label for="ia-market">Country (sets the currency)</label><select class="input" id="ia-market"></select></div>
+              <div class="field"><label for="ra-species">Animals</label>
+                <select class="input" id="ra-species"><option value="dairy">Dairy cows</option><option value="beef">Beef cattle (feedlot)</option></select></div>
+              <div class="field"><label for="ra-perf" id="ra-perf-l">Milk per cow per day (kg)</label><input class="input" id="ra-perf" inputmode="decimal" autocomplete="off" /></div>
+              <div class="field"><label for="ra-price" id="ra-price-l">Milk price</label><input class="input" id="ra-price" inputmode="decimal" autocomplete="off" placeholder="your price" /></div>
+              <div class="field"><label for="ra-head" id="ra-head-l">Number of milking cows</label><input class="input" id="ra-head" inputmode="decimal" autocomplete="off" /></div>
+            </div>
+            <div>
+              <h3>Ration per head per day</h3>
+              <p class="muted" style="font-size:.9rem">We do not pre-fill any amount or price, so the numbers are yours. If your dealer quotes per bag, divide the bag price by the bag weight in kg.</p>
+            </div>
+            <div class="rows" id="ra-rows"></div>
+            <datalist id="ra-feeds-list"></datalist>
+            <div><button type="button" class="btn btn--ghost btn--small" id="ra-add">Add a feed</button></div>
+          </div>
+          <aside class="receipt" aria-live="polite" aria-label="Your ration result">
+            <dl>
+              <div><dt>Feed cost per head per day</dt><dd id="ra-day">—</dd></div>
+              <div class="big"><dt id="ra-perkg-l">Feed cost per kg</dt><dd id="ra-perkg">—</dd></div>
+              <div><dt id="ra-margin-l">Income over feed cost</dt><dd id="ra-margin">—</dd></div>
+              <div><dt>Feed cost for the whole group per day</dt><dd id="ra-herd">—</dd></div>
+              <div><dt>Feed cost for the whole group per 30 days</dt><dd id="ra-month">—</dd></div>
+            </dl>
+            <p class="muted-on-ink" id="ra-kg"></p>
+            <p class="muted-on-ink" id="ra-share"></p>
+            <div class="split" id="ra-split"></div>
+            <p class="warn">These numbers show the economics of the ration you wrote. They do not check whether it is adequate or safe. For that, rely on your veterinarian or herd nutritionist.</p>
+          </aside>
+        </div>
+        <div class="satisfy">
+          <h3>Are you satisfied with this ration?</h3>
+          <div class="satisfy-btns">
+            <button type="button" class="btn btn--tag" id="ra-yes" aria-pressed="false">Yes, I am satisfied</button>
+            <button type="button" class="btn btn--ghost" id="ra-no" aria-pressed="false">No, I am not satisfied</button>
+          </div>
+          <div id="ra-answer" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="how" aria-labelledby="how-h">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="how-h">How it works, and what it does not do</h2>
+        </div>
+        <ul class="limits-light">
+          <li><strong>Your numbers, your currency.</strong> We show no reference feed prices for your country yet, because we found no dated, sourced price list we could trust. Prices you type are the only prices used.</li>
+          <li><strong>Economics only.</strong> The result tells you what the ration costs and earns. It does not say the ration is nutritionally correct. A ration review by a veterinarian does that.</li>
+          <li><strong>Nothing is sent without you.</strong> The review request is text you copy and send yourself.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Made by Dr. Seyed Farhad Riazi, veterinarian.</p>
+      <p>Results depend entirely on the amounts and prices you enter. They are not a prescription for your animals.</p>
+    </div>
+  </footer>
+
+  <noscript><p style="padding:1rem">Please turn on JavaScript to use the calculator.</p></noscript>
+  <script type="module" src="js/intl.js"></script>
+</body>
+</html>

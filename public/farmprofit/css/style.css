@@ -268,3 +268,19 @@ details ul { padding-inline-start: 1.2rem; }
 #ra-answer .next p, #ra-answer .next ul { margin: 0; }
 @media (max-width: 560px) { .bar { grid-template-columns: 5rem 1fr 2.6rem; } }
 .receipt dd + dd { font-size: 1.5rem; margin-top: 0.2rem; }
+
+/* ---------- request ("درخواست جیره‌نویسی") + international page ---------- */
+.request { margin-top: 1.2rem; padding-top: 1.2rem; border-top: 1.5px dashed var(--line); width: 100%; }
+.request h4 { margin: 0; font-size: 1.05rem; font-weight: 800; }
+.request textarea, #ia-req textarea, #ra-answer textarea.input { width: 100%; min-height: 5rem; padding: 0.6rem 0.7rem; line-height: 1.7; resize: vertical; }
+#ia-req { display: grid; gap: 0.7rem; width: 100%; }
+#ra-req { display: grid; gap: 0.7rem; width: 100%; }
+#ra-answer .field, #ra-answer .next { width: 100%; }
+body.intl h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); }
+html[dir="ltr"] .bar i { background: linear-gradient(to right, var(--tag) var(--w), #33353d var(--w)); }
+.limits-light { list-style: none; margin: 0; padding: 0; display: grid; max-width: 52rem; }
+.limits-light li { padding-block: 1rem; border-top: 1px solid var(--line); }
+.limits-light li:last-child { border-bottom: 1px solid var(--line); }
+body.intl .receipt dd { font-size: 1.9rem; }
+body.intl .receipt .big dd { font-size: 2.6rem; }
+body.intl .receipt a { color: var(--tag); }
