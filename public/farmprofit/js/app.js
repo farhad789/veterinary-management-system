@@ -152,7 +152,7 @@ function renderFresh() {
     f.innerHTML = `هشدار قدیمی‌بودن: این قیمت‌ها ${fa(daysOld)} روز پیش (${META.dateFa}) ثبت شده‌اند. پیش از تصمیم از فروشنده بپرسید.`;
   } else {
     f.className = 'fresh';
-    f.innerHTML = `<span class="tag tag--ok">قیمت ${META.dateFa}</span><span>منبع: <a href="${PRODUCTS.find((p) => p.id === state.product).page}" target="_blank" rel="noopener noreferrer">${META.source}</a></span>`;
+    f.innerHTML = `<span class="tag tag--hypo">گزارش منبع: ${META.dateFa}</span><span>منبع: <a href="${PRODUCTS.find((p) => p.id === state.product).page}" target="_blank" rel="noopener noreferrer">${META.source}</a></span>`;
   }
 }
 
@@ -186,7 +186,7 @@ function renderDetail() {
   const pn = provName(state.province);
   const pr = prodName(state.product);
   let html = `<div class="detail-head"><h3>${pr} در ${pn}</h3>`;
-  html += rs.length ? '<span class="tag tag--ok">تأییدشده</span>' : '<span class="tag tag--none">موجود نیست</span>';
+  html += rs.length ? '<span class="tag tag--hypo">قیمت گزارش‌شده؛ واحد استنباط‌شده</span>' : '<span class="tag tag--none">موجود نیست</span>';
   html += '</div>';
 
   if (rs.length) {
@@ -223,6 +223,7 @@ function renderMethod() {
     `منبع: ${META.source}، صفحه‌ی هر نهاده، خوانده‌شده در ${META.dateFa}.`,
     'این‌ها قیمت‌های گزارش‌شده‌اند (حداقل و حداکثر)، نه قیمت قطعی یک معامله.',
     'نوع و کیفیت کالا، شرایط تحویل و حمل در منبع مشخص نیست.',
+    'واحد قیمت در صفحه‌ی اصلی منبع صریح نیست؛ تبدیل ریال به تومان یک استنباط با تطبیق منبع دوم است و باید پیش از خرید با فروشنده تأیید شود.',
     'جدول‌های منبع فقط چند استان یا بندر را برای هر نهاده دارند و برای استان مرکزی ردیفی نیست.',
     'واحد ذرت فقط برای کالای وارداتی بندرها آمده است، نه ذرت داخلی.',
   ].map((t) => `<li>${t}</li>`).join('');

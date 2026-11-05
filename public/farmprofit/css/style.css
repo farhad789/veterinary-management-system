@@ -284,3 +284,29 @@ html[dir="ltr"] .bar i { background: linear-gradient(to right, var(--tag) var(--
 body.intl .receipt dd { font-size: 1.9rem; }
 body.intl .receipt .big dd { font-size: 2.6rem; }
 body.intl .receipt a { color: var(--tag); }
+
+
+/* Evidence-aware ration review and farmer learning cards */
+#ra-answer .decision-dialogue { width:100%; display:grid; gap:.9rem; }
+#ra-answer .decision-dialogue > p { margin:0; line-height:1.9; }
+#ra-answer .decision-dialogue .fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:.8rem; }
+#ra-answer .learning-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:.8rem; width:100%; }
+#ra-answer .learning-card { border:1px solid var(--line); border-inline-start:4px solid var(--tag); border-radius:var(--radius); padding:1rem; background:var(--milk); display:grid; gap:.55rem; align-content:start; }
+#ra-answer .learning-card h4, #ra-answer .learning-card p { margin:0; }
+#ra-answer .learning-card p { line-height:1.8; font-size:.9rem; }
+#ra-answer .learning-card a { font-size:.82rem; font-weight:700; color:var(--pasture); }
+#ra-answer .learning-question { border-top:1px dashed var(--line); padding-top:.5rem; }
+#ra-answer .decision-feedback { background:#fff8df; border:1px solid #e6c65c; border-radius:var(--radius); padding:1rem; width:100%; line-height:1.9; }
+#ra-answer .decision-feedback ul { margin:.4rem 0; padding-inline-start:1.3rem; }
+#ra-answer .profile-details { border:1px solid var(--line); border-radius:var(--radius); padding:.8rem; width:100%; }
+#ra-answer .profile-details summary { cursor:pointer; font-weight:800; margin-bottom:.8rem; }
+#ra-answer .profile-details[open] summary { margin-bottom:1rem; }
+#ra-answer .field { display:grid; gap:.35rem; }
+#ra-answer .field label { font-weight:700; font-size:.9rem; }
+@media (max-width:600px) { #ra-answer .learning-grid { grid-template-columns:1fr; } }
+
+.reference-links { display:grid; gap:.45rem; padding-inline-start:1.2rem; line-height:1.7; }
+.reference-links a { overflow-wrap:anywhere; }
+
+.learning-card { position:relative; padding-top:1.8rem; }
+.learning-brand { position:absolute; top:.42rem; inset-inline-end:.7rem; font-size:.68rem; font-weight:700; color:var(--muted); opacity:.82; }
