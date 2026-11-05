@@ -310,3 +310,14 @@ body.intl .receipt a { color: var(--tag); }
 
 .learning-card { position:relative; padding-top:1.8rem; }
 .learning-brand { position:absolute; top:.42rem; inset-inline-end:.7rem; font-size:.68rem; font-weight:700; color:var(--muted); opacity:.82; }
+
+/* FarmProfit educational poster library */
+.poster-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:1.2rem; align-items:start; }
+.poster-card { background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:.8rem; display:grid; gap:.55rem; min-width:0; }
+.poster-card a { display:block; border-radius:12px; overflow:hidden; background:#102b50; }
+.poster-card img { display:block; width:100%; height:auto; aspect-ratio:4/5; object-fit:contain; transition:transform .2s ease; }
+.poster-card a:hover img { transform:scale(1.025); }
+.poster-card h3 { margin:.2rem 0 0; font-size:1rem; line-height:1.35; }
+.poster-card p { margin:0; color:var(--muted); font-size:.9rem; line-height:1.7; }
+.poster-note { margin-top:1rem; padding:.85rem 1rem; border-inline-start:4px solid var(--tag); background:var(--milk); border-radius:10px; line-height:1.8; }
+@media (max-width:560px) { .poster-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem; } .poster-card { padding:.5rem; } .poster-card h3 { font-size:.88rem; } .poster-card p { font-size:.78rem; } }
