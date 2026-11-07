@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>اشتراک پاسخ‌های منبع‌دار | FarmProfit</title>
+  <meta name="description" content="اشتراک پاسخ‌های منبع‌دار مشکلات تغذیه‌ی گاو شیری و گوشتی: مراحل عملی، عددها و منبع‌ها." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='8' width='26' height='16' rx='8' fill='%23ffc72c' stroke='%2315161b' stroke-width='2'/%3E%3Ccircle cx='10' cy='16' r='2.5' fill='%23f7f8f4' stroke='%2315161b' stroke-width='2'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@400;600;700;800&display=swap" />
+  <script type="module" crossorigin src="/farmprofit/assets/subscribe-DTsWcuvW.js"></script>
+  <link rel="modulepreload" crossorigin href="/farmprofit/assets/request-Cv2gUkVI.js">
+  <link rel="modulepreload" crossorigin href="/farmprofit/assets/store-DRhW6nc7.js">
+  <link rel="modulepreload" crossorigin href="/farmprofit/assets/data-DjJeIff1.js">
+  <link rel="stylesheet" crossorigin href="/farmprofit/assets/request-9L93uuD1.css">
+</head>
+<body class="sub">
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html" aria-label="FarmProfit، صفحه‌ی اصلی">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="8" width="26" height="16" rx="8" fill="#ffc72c" stroke="#15161b" stroke-width="2"/><circle cx="10" cy="16" r="2.5" fill="#f7f8f4" stroke="#15161b" stroke-width="2"/></svg>
+        <span>FarmProfit</span>
+      </a>
+      <nav class="nav" aria-label="صفحه‌ها">
+        <a href="index.html">قیمت‌ها و جیره</a>
+        <a href="problems.html">مشکلات تغذیه</a>
+        <a href="subscribe.html" aria-current="page">اشتراک</a>
+        <a href="answers.html">پاسخ‌ها</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="band">
+      <div class="wrap narrow">
+        <h1>اشتراک پاسخ‌های منبع‌دار</h1>
+        <p class="lede">برای هر مشکل فهرست‌شده: مراحل عملی، عددهای مهم و لینک منبع. مرجع‌ها دقیقاً همان صفحه‌هایی‌اند که خوانده شده، پس هر عدد را خودتان هم می‌توانید بررسی کنید.</p>
+        <p id="from-problem" class="mode-note" hidden></p>
+
+        <ul class="incl">
+          <li id="incl-count">پاسخ مشکلات رایج گاو شیری و گوشتی</li>
+          <li>مراحل عملی، عددها و هشدارها، با شماره‌ی منبع کنار هر مورد</li>
+          <li>دسترسی تا پایان مدت طرحی که می‌خرید</li>
+        </ul>
+
+        <p id="price-note" class="mode-note" hidden></p>
+
+        <form id="reg" class="regform" novalidate>
+          <fieldset class="plans" id="plans"><legend>طرح را انتخاب کنید</legend></fieldset>
+
+          <div class="field"><label for="f-name">نام و نام خانوادگی</label><input class="input" id="f-name" autocomplete="name" maxlength="80" required /></div>
+          <div class="field"><label for="f-contact">شماره‌ی تماس یا آی‌دی اینستاگرام</label><input class="input" id="f-contact" maxlength="80" required dir="ltr" placeholder="09… یا @id" /></div>
+          <div class="field"><label for="f-prov">استان</label><select class="input" id="f-prov"></select></div>
+          <div class="field"><label for="f-herd">نوع گله</label>
+            <select class="input" id="f-herd"><option value="dairy">گاو شیری</option><option value="beef">گاو گوشتی</option><option value="both">هر دو</option></select>
+          </div>
+          <p class="perr" id="reg-err" role="alert" hidden></p>
+          <button class="btn btn--tag" type="submit">ثبت‌نام و ساخت پیام پرداخت</button>
+        </form>
+
+        <section id="after" class="afterbox" hidden aria-live="polite">
+          <h2>ثبت‌نام شما انجام شد</h2>
+          <p id="after-mode" class="mode-note" hidden></p>
+          <ol class="stepsl">
+            <li><strong>پیام زیر را کپی کنید</strong> و در اینستاگرام برای دکتر ریاضی بفرستید.</li>
+            <li>راه پرداخت را در همان گفت‌وگو برایتان می‌فرستند.</li>
+            <li>پس از واریز و تأیید دکتر، <strong>کد دسترسی</strong> می‌گیرید و با آن وارد صفحه‌ی پاسخ‌ها می‌شوید.</li>
+          </ol>
+          <label for="msg" class="msg-l">متن پیام</label>
+          <textarea id="msg" class="input" rows="10" readonly></textarea>
+          <div class="satisfy-btns">
+            <button class="btn" id="copy" type="button">کپی پیام</button>
+            <a class="btn btn--tag" id="dm" href="#" target="_blank" rel="noopener noreferrer">باز کردن دایرکت اینستاگرام</a>
+            <a class="btn btn--ghost" href="answers.html">کد دسترسی دارم</a>
+          </div>
+          <p id="copied" class="muted" role="status" hidden>کپی شد. حالا در دایرکت اینستاگرام بچسبانید.</p>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>ساخته‌شده توسط دکتر سید فرهاد ریاضی، دامپزشک.</p>
+      <p>پرداخت در این سایت انجام نمی‌شود. هیچ اطلاعات کارت بانکی از شما گرفته نمی‌شود.</p>
+    </div>
+  </footer>
+</body>
+</html>
