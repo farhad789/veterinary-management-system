@@ -1,0 +1,37 @@
+# HANDOFF.md: shared baton for all agents
+
+Any agent (Claude, ChatGPT, Bolt, Grok, or a human) must read this file FIRST and update it LAST. Goal: the next agent continues the work without asking the owner to explain everything again.
+
+Keep it short. Rewrite the "Current state" sections each time. Only the Log grows.
+
+## Current state
+
+**Goal right now:** (one sentence)
+
+**Done and working:**
+- (what is finished and checked)
+
+**In progress:**
+- (task, which files, how far it got, what is half-done)
+
+**Next steps (in order):**
+1. (the very next action, specific enough to start immediately)
+2.
+3.
+
+**Do not touch / waiting for owner:**
+- (files or topics frozen, questions waiting for Dr. Riazi's answer)
+
+**Known problems:**
+- (bugs, doubts, things to verify)
+
+## Decisions already made (do not reopen without the owner)
+- (date: decision, reason)
+
+## Owner's last instruction (copy it exactly)
+> (paste the owner's last prompt or request here)
+
+## Log (newest first)
+Format: `YYYY-MM-DD HH:MM | agent name | what I did | files changed | what the next agent should do`
+
+- 2026-11-10 | setup | Created HANDOFF.md | HANDOFF.md | Fill in "Current state" at the first real task
