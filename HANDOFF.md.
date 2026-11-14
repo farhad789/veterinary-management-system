@@ -18,6 +18,8 @@ Keep it short. Rewrite the "Current state" sections each time. Only the Log grow
 - FarmProfit has an open draft PR #2 (`feat/evidence-aware-ration-dialogue`, head `c317849b`). It is not merged into `main` and has not been included in the verified public sync. Do not transfer it unless the owner explicitly approves.
 - VetRay's latest observed commit is the handoff update; no application source files were changed by this audit.
 
+**Quiz page (2026-11-14):** Static, self-contained VetRay quiz (Small Animal and Large Animal tracks, 7 cases each, Persian/English) added at `public/quiz/index.html` on branch `change/vetray-quiz`. No app source, auth, or database files touched. Not merged to `main`; waiting for owner approval after preview. It is not linked from the site navigation yet.
+
 **Supabase status:**
 - Supabase authorization is now Active for the connected account.
 - The connected account lists organization `Farhad789` (`saxkwotksjqxraismnci`) but lists zero projects. The intended project has not been identified; do not guess a project reference.
@@ -47,10 +49,12 @@ Keep it short. Rewrite the "Current state" sections each time. Only the Log grow
 
 ## Owner's latest instruction
 > You only contiue chang that cloud creat and save in the repo corresponding with hand-off in vetray
+> (2026-11-14) Push the VetRay small/large animal quiz to GitHub in VetRay (veterinary-management-system).
 
 ## Log (newest first)
 Format: `YYYY-MM-DD HH:MM | agent name | what I did | files changed | what the next agent should do`
 
+- 2026-11-14 | Claude | Added standalone bilingual quiz page on branch `change/vetray-quiz`; no app code, auth, database, or deployment changes | `public/quiz/index.html`, `HANDOFF.md.` | Owner previews `/quiz/` and approves; then merge to `main` and decide where to link it from the site.
 - 2026-11-14 | ChatGPT | Re-read this handoff; verified FarmProfit main at `b6138fc`, successful public-sync run `42389892655`, VetRay public mirror presence, empty Supabase project inventory, blank FarmProfit Supabase client config, and open draft PR #2; no app code, database, or deployment changes made | `HANDOFF.md.` | Owner supplies the exact Supabase dashboard URL/project reference; next agent performs read-only schema inspection, then continues only approved public-safe changes.
 - 2026-11-14 | ChatGPT | Read the VetRay handoff, initiated a new Supabase authorization link, and recorded the verified starting state; no Supabase or application changes made | HANDOFF.md. | Owner completes Supabase authorization; next agent confirms Active status, identifies the exact project, then performs read-only inspection before proposing changes.
 - 2026-11-10 | setup | Created HANDOFF.md | HANDOFF.md | Fill in "Current state" at the first real task

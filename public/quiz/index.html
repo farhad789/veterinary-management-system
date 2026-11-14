@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VetRay Quiz</title>
+<style>
+/* Layout: one calm column, clinical case card on top, answer reveal below, 7-segment progress as the only decoration */
+:root {
+  --bg: #F2F6F7;
+  --surface: #FFFFFF;
+  --fg: #10262D;
+  --muted: #55707A;
+  --line: #D5E1E5;
+  --accent: #0B7F86;
+  --accent-fg: #FFFFFF;
+  --ok: #1C7C4B;
+  --ok-bg: #E3F4EA;
+  --bad: #B3342B;
+  --bad-bg: #FBE7E5;
+  --font-display: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C1A1F; --surface: #132830; --fg: #E6F1F3; --muted: #8FAAB3; --line: #25414A;
+    --accent: #3CC1C7; --accent-fg: #07272A; --ok: #5CCB8D; --ok-bg: #12301F; --bad: #F0877F; --bad-bg: #3A1815;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C1A1F; --surface: #132830; --fg: #E6F1F3; --muted: #8FAAB3; --line: #25414A;
+  --accent: #3CC1C7; --accent-fg: #07272A; --ok: #5CCB8D; --ok-bg: #12301F; --bad: #F0877F; --bad-bg: #3A1815;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 720px; margin-inline: auto; display: flex; flex-direction: column; gap: 20px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 1px solid var(--line); position: relative; }
+header::after { content: ""; position: absolute; inset-inline-start: 0; bottom: -1px; width: 72px; height: 2px; background: var(--accent); }
+.brand { display: flex; flex-direction: column; line-height: 1.2; }
+.brand b { font-family: var(--font-display); font-size: 26px; letter-spacing: -0.02em; }
+.brand b span { color: var(--accent); }
+.brand small { color: var(--muted); font-size: 13px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: transparent; padding: 6px 14px; font-size: 14px; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+
+h1, h2 { font-family: var(--font-display); letter-spacing: -0.01em; text-wrap: balance; margin: 0; }
+h1 { font-size: 24px; }
+.lead { color: var(--muted); margin: 0; }
+
+.tracks { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.track { text-align: start; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.track:hover { border-color: var(--accent); }
+.track strong { font-family: var(--font-display); font-size: 20px; }
+.track span { color: var(--muted); font-size: 14px; }
+.track em { font-style: normal; color: var(--accent); font-size: 13px; font-weight: 600; margin-top: 8px; }
+
+.progress { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.progress i { height: 6px; border-radius: 3px; background: var(--line); }
+.progress i.cur { background: var(--accent); }
+.progress i.ok { background: var(--ok); }
+.progress i.bad { background: var(--bad); }
+.meta { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.meta b { color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; font-size: 12px; }
+
+.case { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; font-size: 18px; line-height: 1.6; overflow-wrap: anywhere; }
+.opts { display: flex; flex-direction: column; gap: 10px; }
+.opt { display: flex; gap: 12px; align-items: flex-start; text-align: start; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+.opt .k { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 13px; font-weight: 600; color: var(--muted); }
+.opt .t { min-width: 0; overflow-wrap: anywhere; }
+.opt:not(:disabled):hover { border-color: var(--accent); }
+.opt:disabled { cursor: default; }
+.opt.ok { background: var(--ok-bg); border-color: var(--ok); }
+.opt.ok .k { background: var(--ok); border-color: var(--ok); color: var(--bg); }
+.opt.bad { background: var(--bad-bg); border-color: var(--bad); }
+.opt.bad .k { background: var(--bad); border-color: var(--bad); color: var(--bg); }
+.opt.dim { opacity: 0.6; }
+
+.reveal { border-inline-start: 4px solid var(--accent); background: var(--surface); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.reveal.ok { border-color: var(--ok); }
+.reveal.bad { border-color: var(--bad); }
+.reveal b { font-family: var(--font-display); }
+.reveal.ok b { color: var(--ok); }
+.reveal.bad b { color: var(--bad); }
+.reveal p { margin: 0; overflow-wrap: anywhere; }
+
+.btn { background: var(--accent); color: var(--accent-fg); border: 0; border-radius: 10px; padding: 12px 20px; font-weight: 600; text-decoration: none; display: inline-block; text-align: center; }
+.btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); font-weight: 500; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.actions.end { justify-content: flex-end; }
+
+.result { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+.score { font-family: var(--font-display); font-size: 56px; line-height: 1; font-variant-numeric: tabular-nums; }
+.score small { font-size: 24px; color: var(--muted); }
+.cta { border-top: 1px solid var(--line); padding-top: 16px; display: flex; flex-direction: column; gap: 12px; }
+.cta p { margin: 0; }
+.note { color: var(--muted); font-size: 12.5px; margin: 0; }
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: no-preference) { .opt, .track, .btn { transition: border-color .15s, background-color .15s; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><b>Vet<span>Ray</span></b><small id="tag"></small></div>
+    <div class="seg" role="group" aria-label="Language">
+      <button id="lfa" type="button">فارسی</button>
+      <button id="len" type="button">EN</button>
+    </div>
+  </header>
+  <main id="app" class="wrap" style="gap:20px" aria-live="polite"></main>
+  <p class="note" id="disc"></p>
+</div>
+
+<script>
+var SITE = "https://veterinary-assistant-qldk.bolt.host/";
+var UI = {
+  fa: {
+    tag: "کیس‌های بالینی کوتاه برای دامپزشکان", pick: "یک مسیر را انتخاب کنید",
+    lead: "هر مسیر ۷ کیس بالینی دارد. پاسخ را انتخاب کنید و توضیح را همان لحظه ببینید.",
+    small: "کوچک‌دامی", smallSub: "سگ و گربه", large: "بزرگ‌دامی", largeSub: "گاو و گوساله",
+    cases: "۷ کیس", start: "شروع", day: "روز", of: "از", correct: "درست", wrong: "نادرست",
+    next: "کیس بعدی", finish: "دیدن نتیجه", yourScore: "نمره شما",
+    m3: "عالی بود. این مسیر را برای همکارانتان بفرستید.", m2: "خوب بود. توضیح کیس‌های اشتباه را مرور کنید.", m1: "مرور توضیح‌ها به شما کمک می‌کند. دوباره امتحان کنید.",
+    ctaT: "توضیح کامل و کیس‌های بیشتر در وب‌سایت", visit: "بازدید از وب‌سایت", copy: "کپی نمره", copied: "کپی شد",
+    other: "مسیر دیگر", again: "شروع دوباره", letters: ["الف", "ب", "ج", "د"],
+    share: function (t, s, m) { return "من در VetRay مسیر " + t + " نمره " + s + " از " + m + " گرفتم. شما چه نمره‌ای می‌گیرید؟ " + SITE; },
+    disc: "محتوای آموزشی برای دامپزشکان. پیش از اجرا، دوزها و روش‌ها را با پروتکل خودتان و مقررات محلی تطبیق دهید."
+  },
+  en: {
+    tag: "Short clinical cases for veterinarians", pick: "Choose a track",
+    lead: "Each track has 7 clinical cases. Pick an answer and see the explanation right away.",
+    small: "Small Animal", smallSub: "Dogs and cats", large: "Large Animal", largeSub: "Cattle and calves",
+    cases: "7 cases", start: "Start", day: "Day", of: "of", correct: "Correct", wrong: "Not quite",
+    next: "Next case", finish: "See result", yourScore: "Your score",
+    m3: "Excellent. Send this track to a colleague.", m2: "Good work. Review the explanations for the cases you missed.", m1: "The explanations will help. Try the track again.",
+    ctaT: "Full explanations and more cases on the website", visit: "Visit the website", copy: "Copy my score", copied: "Copied",
+    other: "Other track", again: "Restart", letters: ["A", "B", "C", "D"],
+    share: function (t, s, m) { return "I scored " + s + "/" + m + " on VetRay " + t + " Track. Can you beat it? " + SITE; },
+    disc: "Educational content for veterinarians. Check doses and procedures against your own protocols and local regulations before applying."
+  }
+};
+
+var q = function (tf, te, cf, ce, o, a, ef, ee) {
+  return { t: { fa: tf, en: te }, c: { fa: cf, en: ce }, o: o.map(function (x) { return { fa: x[0], en: x[1] }; }), a: a, e: { fa: ef, en: ee } };
+};
+
+var DATA = {
+  small: [
+    q("اورژانس", "Emergency",
+      "یک گریت‌دین ۵ ساله با عق‌زدن بی‌نتیجه، شکم متسع، مخاط رنگ‌پریده و ضربان ۱۶۰. اولین اقدام چیست؟",
+      "A 5-year-old Great Dane has unproductive retching, a distended abdomen, pale gums and a heart rate of 160. What is the first step?",
+      [["ارسال به خانه با ضداسید", "Send the owner home with an antacid"], ["رگ‌گیری، مایع‌درمانی شوک و مسکن، سپس تخلیه گاز معده", "IV access, shock-dose fluids and analgesia, then decompression"], ["جراحی فوری بدون تثبیت", "Immediate surgery with no stabilization"], ["ملین خوراکی", "Oral laxative"]], 1,
+      "به GDV مشکوک شوید. ابتدا تثبیت (مایع، مسکن، ECG برای آریتمی)، سپس تخلیه و بعد جراحی با گاسترو‌پکسی.",
+      "Suspect GDV. Stabilize first (fluids, analgesia, ECG for arrhythmias), decompress, then do surgery with gastropexy."),
+    q("قلب", "Cardiology",
+      "گربه‌ای ناگهان فریاد می‌زند، اندام خلفی سرد و دردناک و نبض فمورال ندارد. محتمل‌ترین تشخیص؟",
+      "A cat suddenly cries out, has cold and painful hind limbs and no femoral pulses. Most likely diagnosis?",
+      [["ضربه نخاعی", "Spinal trauma"], ["ترومبوآمبولی آئورت ثانویه به کاردیومیوپاتی", "Aortic thromboembolism secondary to cardiomyopathy"], ["هیپوگلیسمی", "Hypoglycemia"], ["دیسپلازی لگن", "Hip dysplasia"]], 1,
+      "ترومبوز زینی معمولاً با کاردیومیوپاتی هیپرتروفیک همراه است. مسکن بدهید، قلب را ارزیابی کنید و پیش‌آگهی را با مالک در میان بگذارید.",
+      "The saddle thrombus is typically linked to hypertrophic cardiomyopathy. Give analgesia, evaluate the heart and discuss the prognosis with the owner."),
+    q("بیماری‌های عفونی", "Infectious disease",
+      "سگ واکسن‌نزده‌ای که در آب راکد شنا کرده، تب، استفراغ، ایکتر و افزایش کراتینین دارد. محتمل‌ترین علت؟",
+      "An unvaccinated dog that swam in stagnant water has fever, vomiting, jaundice and rising creatinine. Most likely cause?",
+      [["دیستمپر", "Canine distemper"], ["لپتوسپیروز", "Leptospirosis"], ["کرم قلب", "Heartworm"], ["آلرژی غذایی", "Food allergy"]], 1,
+      "با PCR و سرولوژی (MAT) تأیید کنید. چون بیماری زئونوز است از دستکش و بهداشت استفاده کنید. واکسیناسیون خطر را کم می‌کند.",
+      "Confirm with PCR and paired serology (MAT). Use gloves and hygiene, because the disease is zoonotic. Vaccination reduces risk."),
+    q("غدد درون‌ریز", "Endocrine",
+      "سگ دیابتی با استفراغ و بی‌حالی، گلوکز ۴۵۰ mg/dL، کتونوری و اسیدوز متابولیک. اولین اقدام؟",
+      "A diabetic dog is vomiting and lethargic, with glucose 450 mg/dL, ketonuria and metabolic acidosis. What comes first?",
+      [["تزریق دوز بالای انسولین", "A big insulin bolus"], ["مایع‌درمانی وریدی و اصلاح الکترولیت‌ها، سپس شروع انسولین", "IV fluids and electrolyte correction, with insulin started afterward"], ["گلوکز خوراکی", "Oral glucose"], ["فقط تغییر رژیم", "Dietary change only"]], 1,
+      "این DKA است. مایع‌درمانی را شروع کنید، پتاسیم و فسفات را کنترل کنید و پس از ساعات اول مایع‌درمانی، انسولین با دوز پایین را شروع کنید.",
+      "This is DKA. Begin fluids, check potassium and phosphate, then start low-dose insulin after the first hours of fluid therapy."),
+    q("فارماکولوژی", "Pharmacology",
+      "مالک یک قرص پاراستامول انسانی به گربه داده است. اکنون مخاط قهوه‌ای‌رنگ، ورم صورت و تنفس تند دارد. مشکل چیست؟",
+      "An owner gave a cat a human paracetamol tablet. The cat now has brown-tinged gums, facial swelling and fast breathing. What is the problem?",
+      [["متهموگلوبینمی", "Methemoglobinemia"], ["هیپوکلسمی", "Hypocalcemia"], ["تهوع ساده", "Simple motion sickness"], ["پرکاری تیروئید", "Hyperthyroidism"]], 0,
+      "گربه‌ها توان گلوکورونیداسیون برای سم‌زدایی پاراستامول را ندارند. در کلینیک با اکسیژن و N-استیل‌سیستئین درمان کنید. مالکان هرگز نباید مسکن انسانی به گربه بدهند.",
+      "Cats lack the glucuronidation capacity to detoxify paracetamol. Treat with oxygen and N-acetylcysteine at the clinic. Owners must never give human painkillers to cats."),
+    q("بیهوشی", "Anesthesia",
+      "سگی براکی‌سفالیک در حال ریکاوری از بیهوشی است. چه زمانی لوله را خارج می‌کنید؟",
+      "A brachycephalic dog is recovering from anesthesia. When should you extubate?",
+      [["بلافاصله پس از پایان جراحی", "Immediately after surgery ends"], ["تا حد ممکن دیر، وقتی هوشیار است و رفلکس بلع قوی دارد", "As late as possible, once the dog is awake with a strong swallow reflex"], ["هرگز", "Never"], ["فقط وقتی مالک برسد", "Only when the owner arrives"]], 1,
+      "انسداد راه هوایی خطر اصلی است. حیوان را در وضعیت سینه‌ای نگه دارید، دقیق پایش کنید و اکسیژن آماده داشته باشید.",
+      "Airway obstruction is the main risk. Keep the dog in sternal recumbency, monitor closely and have oxygen ready."),
+    q("نکته برای مالک", "Owner tip",
+      "گربه نر شما در ظرف خاک زور می‌زند اما ادرار کمی دارد یا اصلاً ادرار نمی‌کند. چه کنید؟",
+      "Your male cat strains in the litter box but passes little or no urine. What should you do?",
+      [["دو روز صبر کنم", "Wait two days and see"], ["ملین بدهم", "Give a laxative"], ["همان روز نزد دامپزشک بروم", "See a vet the same day"], ["آب او را کم کنم", "Reduce his water"]], 2,
+      "این می‌تواند انسداد پیشابراه باشد که ظرف یک تا دو روز تهدیدکننده جان می‌شود. فرض نکنید یبوست است.",
+      "This can be a urethral obstruction, which becomes life-threatening within a day or two. Do not assume it is constipation.")
+  ],
+  large: [
+    q("اورژانس متابولیک", "Metabolic emergency",
+      "گاو پرتولید، یک روز پس از زایمان، خوابیده، گوش‌های سرد، ضربان ضعیف و کند. محتمل‌ترین تشخیص و اولین اقدام؟",
+      "A high-producing cow, 1 day after calving, is recumbent with cold ears, a depressed heart rate and a weak pulse. Most likely diagnosis and first step?",
+      [["ورم پستان، آنتی‌بیوتیک خوراکی", "Mastitis, so give oral antibiotics"], ["هیپوکلسمی (تب شیر)، کلسیم وریدی آهسته همراه با پایش قلب", "Hypocalcemia (milk fever), so give slow IV calcium while monitoring the heart"], ["اسیدوز شکمبه، فقط جوش‌شیرین خوراکی", "Rumen acidosis, so give a bicarbonate drench only"], ["تنش گرمایی، فقط خنک‌کردن", "Heat stress, so just cool her down"]], 1,
+      "کلسیم را آهسته تزریق کنید و در تمام مدت قلب را سمع کنید، چون تزریق سریع می‌تواند آریتمی ایجاد کند. گاو را روی جناغ نگه دارید و برای جلوگیری از عود، کلسیم خوراکی بدهید.",
+      "Give calcium slowly and auscultate the heart throughout, because rapid infusion can cause arrhythmia. Keep the cow upright on her sternum, and follow up with oral calcium to prevent relapse."),
+    q("دوره انتقال", "Transition cow",
+      "گاوی ۱۰ روز پس از زایمان اشتهای کم، کاهش شیر و بوی شیرین استون در نفس دارد. بهترین تأیید؟",
+      "A cow 10 days after calving has reduced appetite, falling milk yield and a sweet acetone smell on the breath. What is the best confirmation?",
+      [["اندازه‌گیری BHB خون", "Blood BHB measurement"], ["فقط دمای رکتال", "Rectal temperature only"], ["رنگ شیر", "Milk color"], ["شمارش تخم انگل در مدفوع", "Fecal egg count"]], 0,
+      "این کتوز است. BHB خون در حدود ۱٫۲ میلی‌مول بر لیتر یا بیشتر نشانه کتوز تحت‌بالینی است. با پروپیلن‌گلیکول خوراکی و در موارد شدید دکستروز وریدی درمان کنید و سپس جیره دوره انتقال را بازبینی کنید.",
+      "This is ketosis. Blood BHB at or above about 1.2 mmol/L indicates subclinical ketosis. Treat with oral propylene glycol, and with IV dextrose in severe cases, then review the transition ration."),
+    q("اسهال گوساله", "Calf diarrhea",
+      "گوساله ۵ روزه اسهال آبکی، رفلکس مکیدن ضعیف دارد و نمی‌تواند بایستد. مهم‌ترین درمان؟",
+      "A 5-day-old calf has watery diarrhea, a weak suckle reflex and cannot stand. What is the most important treatment?",
+      [["قطع کامل مایعات و شیر برای ۳ روز", "Stop all fluids and milk for 3 days"], ["جایگزینی مایع و الکترولیت همراه با اصلاح اسیدوز، و مایع وریدی اگر نمی‌مکد", "Fluid and electrolyte replacement that also corrects acidosis, with IV fluids if it cannot suckle"], ["فقط آنتی‌بیوتیک", "Antibiotics alone"], ["فقط شیر خشک بیشتر", "Extra milk replacer only"]], 1,
+      "مرگ در گوساله‌های اسهالی معمولاً از کم‌آبی و اسیدوز است، نه خود عامل بیماری‌زا. گوساله‌ای که نمی‌تواند بایستد یا بمکد معمولاً مایع وریدی لازم دارد. پس از بهبود، شیردهی را ادامه دهید.",
+      "Death in scouring calves is usually from dehydration and acidosis, not the pathogen itself. A calf that cannot stand or suckle generally needs IV therapy. Keep milk feeding going once it improves."),
+    q("تغذیه", "Nutrition",
+      "چند گاو مصرف خوراک نوسانی، مدفوع شل با حباب و چربی شیر پایین دارند. جیره نشاسته قابل تخمیر زیاد و علوفه ریزتراشه دارد. محتمل‌ترین مشکل؟",
+      "Several cows show fluctuating intake, loose manure with bubbles and low milk fat. The ration has a lot of fermentable starch and short forage particles. Most likely problem?",
+      [["اسیدوز تحت‌حاد شکمبه (SARA)", "Subacute ruminal acidosis (SARA)"], ["مسمومیت با سلنیوم", "Selenium toxicity"], ["بیماری جسم خارجی", "Hardware disease"], ["فقط اسهال ویروسی گاو", "Bovine viral diarrhea only"]], 0,
+      "کربوهیدرات تخمیرپذیر زیاد و فیبر مؤثر کم، pH شکمبه را پایین می‌آورد. اندازه ذرات علوفه، جداسازی خوراک توسط گاو و تغییر تدریجی از جیره کم‌دانه به پردانه را بررسی کنید.",
+      "Too much fermentable carbohydrate with too little effective fiber lowers rumen pH. Check forage particle size, feed sorting, and the transition from low- to high-grain diets."),
+    q("باقیمانده دارو", "Drug residues",
+      "گاوی برای ورم پستان با آنتی‌بیوتیک درمان شده است. شیر او چه زمانی می‌تواند وارد مخزن شود؟",
+      "A cow was treated with an antibiotic for mastitis. When can her milk enter the bulk tank?",
+      [["به محض سالم‌به‌نظر رسیدن", "As soon as she looks healthy"], ["پس از پایان دوره منع مصرف شیر درج‌شده روی برچسب محصول، و آزمایش باقیمانده در صورت امکان", "After the product's labeled milk withdrawal time, and a residue test where available"], ["همیشه بعد از ۲۴ ساعت", "After 24 hours, always"], ["وقتی ورم کارتیه خوب شد", "When the quarter is no longer swollen"]], 1,
+      "سالم‌به‌نظر رسیدن یعنی عاری‌بودن از باقیمانده نیست. دوره منع مصرف دقیق همان محصول را رعایت و ثبت کنید و گاو را به‌روشنی علامت‌گذاری کنید. باقیمانده‌ها بر سلامت عمومی و فرآوری لبنیات اثر دارند.",
+      "Looking healthy does not mean residue free. Follow the label withdrawal time for the exact product, record it, and mark the cow clearly. Residues affect public health and dairy processing."),
+    q("جراحی گوارشی", "Digestive surgery",
+      "گاو تازه‌زا با کاهش اشتها و شیر. هنگام سمع و پرکاشن در سمت چپ بین دنده‌های آخر و پهلو صدای زنگی «پینگ» می‌شنوید. محتمل‌ترین تشخیص؟",
+      "A fresh cow has reduced appetite and milk, and you hear a high-pitched ping on the left side between the last ribs and the flank. Most likely diagnosis?",
+      [["جابجایی شیردان به چپ", "Left displaced abomasum"], ["ذات‌الریه", "Pneumonia"], ["پیچ‌خوردگی رحم", "Uterine torsion"], ["سمیت آبستنی در تلیسه", "Pregnancy toxemia in a heifer"]], 0,
+      "با پرکاشن و سمع تأیید کنید، کتوز همزمان را بررسی کنید و اصلاح جراحی را در نظر بگیرید، چون بسیاری از موارد خودبه‌خود برطرف نمی‌شوند.",
+      "Confirm by percussion and auscultation, check for ketosis, and consider surgical correction, since many cases do not resolve on their own."),
+    q("نکته برای دامدار", "Farmer tip",
+      "گوساله نوزاد باید اولین آغوز را چه زمانی دریافت کند؟",
+      "When should a newborn calf receive its first colostrum?",
+      [["بعد از ۲۴ ساعت، وقتی استراحت کرد", "After 24 hours, once it has rested"], ["هرچه زودتر، ترجیحاً ظرف ۲ ساعت اول زندگی", "As early as possible, ideally within the first 2 hours of life"], ["فقط اگر گوساله ضعیف به نظر برسد", "Only if the calf looks weak"], ["بعد از روز اول شیر", "After the first day of milk"]], 1,
+      "جذب آنتی‌بادی در ساعات اول بهترین است و بعد از حدود ۶ ساعت به‌سرعت افت می‌کند. از ظروف تمیز و آغوز باکیفیت استفاده کنید، چون همین یک اقدام روی بقای گوساله اثر بزرگی دارد.",
+      "Calves absorb antibodies best in the first hours, and absorption drops quickly after about 6 hours. Use clean equipment and good quality colostrum, since this one step has a large effect on calf survival.")
+  ]
+};
+
+var lang = "fa", track = null, idx = 0, picked = null, results = [], order = [];
+try { var s = localStorage.getItem("vetray-lang"); if (s === "en" || s === "fa") lang = s; } catch (e) {}
+
+function n(x) { return lang === "fa" ? Number(x).toLocaleString("fa-IR") : String(x); }
+function shuffle(a) { var r = a.slice(), i, j, t; for (i = r.length - 1; i > 0; i--) { j = Math.floor(Math.random() * (i + 1)); t = r[i]; r[i] = r[j]; r[j] = t; } return r; }
+function esc(x) { return String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+var app = document.getElementById("app");
+
+function chrome() {
+  var u = UI[lang];
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "fa" ? "rtl" : "ltr";
+  document.getElementById("tag").textContent = u.tag;
+  document.getElementById("disc").textContent = u.disc;
+  document.getElementById("lfa").setAttribute("aria-pressed", lang === "fa");
+  document.getElementById("len").setAttribute("aria-pressed", lang === "en");
+}
+
+function setLang(l) {
+  lang = l;
+  try { localStorage.setItem("vetray-lang", l); } catch (e) {}
+  render();
+}
+document.getElementById("lfa").onclick = function () { setLang("fa"); };
+document.getElementById("len").onclick = function () { setLang("en"); };
+
+function startTrack(k) {
+  track = k; idx = 0; picked = null; results = [];
+  order = DATA[k].map(function (qq) { return shuffle([0, 1, 2, 3]); });
+  render();
+}
+
+function trackName() { return UI[lang][track]; }
+
+function render() {
+  chrome();
+  var u = UI[lang];
+  if (!track) {
+    app.innerHTML =
+      '<div><h1>' + u.pick + '</h1><p class="lead">' + u.lead + '</p></div>' +
+      '<div class="tracks">' +
+      '<button class="track" type="button" data-k="small"><strong>' + u.small + '</strong><span>' + u.smallSub + '</span><em>' + u.cases + ' · ' + u.start + '</em></button>' +
+      '<button class="track" type="button" data-k="large"><strong>' + u.large + '</strong><span>' + u.largeSub + '</span><em>' + u.cases + ' · ' + u.start + '</em></button>' +
+      '</div>';
+    Array.prototype.forEach.call(app.querySelectorAll(".track"), function (b) { b.onclick = function () { startTrack(b.getAttribute("data-k")); }; });
+    return;
+  }
+  var list = DATA[track];
+  if (idx >= list.length) { renderResult(); return; }
+  var cur = list[idx], ord = order[idx], done = picked !== null;
+  var prog = list.map(function (_, i) {
+    var c = i === idx ? "cur" : (results[i] === true ? "ok" : (results[i] === false ? "bad" : ""));
+    return '<i class="' + c + '"></i>';
+  }).join("");
+  var opts = ord.map(function (oi, pos) {
+    var cls = "opt";
+    if (done) { if (oi === cur.a) cls += " ok"; else if (oi === picked) cls += " bad"; else cls += " dim"; }
+    return '<button type="button" class="' + cls + '" data-o="' + oi + '"' + (done ? " disabled" : "") + '><span class="k">' + u.letters[pos] + '</span><span class="t">' + esc(cur.o[oi][lang]) + '</span></button>';
+  }).join("");
+  var html =
+    '<div class="progress" aria-hidden="true">' + prog + '</div>' +
+    '<div class="meta"><b>' + trackName() + ' · ' + esc(cur.t[lang]) + '</b><span>' + u.day + ' ' + n(idx + 1) + ' ' + u.of + ' ' + n(list.length) + '</span></div>' +
+    '<div class="case">' + esc(cur.c[lang]) + '</div>' +
+    '<div class="opts">' + opts + '</div>';
+  if (done) {
+    var ok = picked === cur.a;
+    html += '<div class="reveal ' + (ok ? "ok" : "bad") + '"><b>' + (ok ? u.correct : u.wrong) + '</b><p>' + esc(cur.e[lang]) + '</p></div>' +
+      '<div class="actions end"><button class="btn" id="nx" type="button">' + (idx === list.length - 1 ? u.finish : u.next) + '</button></div>';
+  }
+  app.innerHTML = html;
+  Array.prototype.forEach.call(app.querySelectorAll(".opt"), function (b) {
+    b.onclick = function () { picked = Number(b.getAttribute("data-o")); results[idx] = picked === cur.a; render(); var nx = document.getElementById("nx"); if (nx) nx.focus(); };
+  });
+  var nx = document.getElementById("nx");
+  if (nx) nx.onclick = function () { idx++; picked = null; render(); window.scrollTo(0, 0); };
+}
+
+function renderResult() {
+  var u = UI[lang], m = DATA[track].length;
+  var sc = results.filter(Boolean).length;
+  var msg = sc >= 6 ? u.m3 : (sc >= 4 ? u.m2 : u.m1);
+  var other = track === "small" ? "large" : "small";
+  app.innerHTML =
+    '<div class="result">' +
+    '<div class="meta"><b>' + trackName() + '</b><span>' + u.yourScore + '</span></div>' +
+    '<div class="score">' + n(sc) + '<small> / ' + n(m) + '</small></div>' +
+    '<p>' + msg + '</p>' +
+    '<div class="progress" aria-hidden="true">' + results.map(function (r) { return '<i class="' + (r ? "ok" : "bad") + '"></i>'; }).join("") + '</div>' +
+    '<div class="cta"><p><strong>' + u.ctaT + '</strong></p>' +
+    '<div class="actions"><a class="btn" href="' + SITE + '" target="_blank" rel="noopener">' + u.visit + '</a>' +
+    '<button class="btn ghost" id="cp" type="button">' + u.copy + '</button></div></div>' +
+    '<div class="actions"><button class="btn ghost" id="ot" type="button">' + u.other + ': ' + u[other] + '</button>' +
+    '<button class="btn ghost" id="ag" type="button">' + u.again + '</button></div>' +
+    '</div>';
+  document.getElementById("ot").onclick = function () { startTrack(other); };
+  document.getElementById("ag").onclick = function () { startTrack(track); };
+  var cp = document.getElementById("cp");
+  cp.onclick = function () {
+    var text = u.share(trackName(), n(sc), n(m));
+    var fin = function () { cp.textContent = u.copied; setTimeout(function () { cp.textContent = u.copy; }, 1800); };
+    try { navigator.clipboard.writeText(text).then(fin, function () { window.getSelection().selectAllChildren(cp); }); }
+    catch (e) { window.getSelection().selectAllChildren(cp); }
+  };
+}
+
+render();
+</script>
+</body>
+</html>
