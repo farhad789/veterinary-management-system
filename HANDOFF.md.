@@ -1,51 +1,56 @@
 # HANDOFF.md: shared baton for all agents
 
-Any agent (Claude, ChatGPT, Bolt, Grok, or a human) must read this file FIRST and update it LAST. Goal: the next agent continues the work without asking the owner to explain everything again.
+Any agent (Claude, ChatGPT, Bolt, Grok, or a human) must read this file FIRST and update it LAST. Goal: continue only the cloud-created FarmProfit changes and save approved changes in the corresponding VetRay repository.
 
 Keep it short. Rewrite the "Current state" sections each time. Only the Log grows.
 
 ## Current state
 
-**Goal right now:** Resume the FarmProfit-to-VetRay handoff and verify the intended Supabase project before making any backend changes.
+**Goal right now:** Continue the existing FarmProfit-to-VetRay cloud handoff. Keep FarmProfit private, preserve VetRay's existing application/auth/database, and record only verified changes.
 
-**Done and working:**
-- Owner's established architecture: `farhad789/farmprofit` is the private source of truth; `farhad789/veterinary-management-system` is the public VetRay target.
-- FarmProfit's main branch has Supabase-related schema/seed files and a public-sync workflow; their live deployment and database state still require verification.
-- This handoff file was found in VetRay at the literal path `HANDOFF.md.` (including the trailing period).
+**Repositories and verified state:**
+- Private source of truth: `farhad789/farmprofit`, default branch `main`, latest observed commit `b6138fc96c46cf819dc28811936731f2fb49794c` (2026-11-07).
+- Public target: `farhad789/veterinary-management-system`, default branch `main`.
+- The FarmProfit-to-VetRay GitHub Actions workflow `.github/workflows/sync-public-farmprofit.yml` completed successfully for source commit `b6138fc` (run [42389892655](https://github.com/farhad789/farmprofit/actions/runs/42389892655)).
+- VetRay contains the public mirror under `public/farmprofit/`; its directory and expected site files are present. The workflow publishes only the built static site into that directory; its `rsync --delete` is scoped to `vetray/public/farmprofit/`, not the VetRay repository root.
+- The workflow checks the public build for known private NASEM feed-library markers before publishing. This is a guard, not proof that every possible licensed-data leak has been ruled out; do not add private/licensed source data to the public build.
+- FarmProfit `js/config.js` still has empty `SUPABASE_URL` and `SUPABASE_ANON_KEY`; the current site therefore remains in local-only mode.
+- FarmProfit has an open draft PR #2 (`feat/evidence-aware-ration-dialogue`, head `c317849b`). It is not merged into `main` and has not been included in the verified public sync. Do not transfer it unless the owner explicitly approves.
+- VetRay's latest observed commit is the handoff update; no application source files were changed by this audit.
 
-**In progress:**
-- Supabase authorization was initiated through Composio on 2026-11-14. The owner must complete the authentication link; no active Supabase connection has yet been confirmed.
-- No Supabase project, tables, live schema, or database changes have been verified in this session.
+**Supabase status:**
+- Supabase authorization is now Active for the connected account.
+- The connected account lists organization `Farhad789` (`saxkwotksjqxraismnci`) but lists zero projects. The intended project has not been identified; do not guess a project reference.
+- No live Supabase project, tables, schema, or data were inspected. No SQL was run and no database changes were made.
+- FarmProfit's tracked schema is `docs/supabase/schema.sql`; `docs/supabase/seed-answers.sql` is a separate seed file. Treat seed content as potentially sensitive until reviewed.
 
 **Next steps (in order):**
-1. After the owner completes authorization, confirm that the Supabase connection status is Active.
-2. Identify the exact intended Supabase project from its project URL/reference; do not guess the project.
-3. Perform read-only inspection first: project identity, tables/views, relevant table schemas, and a harmless connectivity check.
-4. Compare the live schema with FarmProfit's tracked `docs/supabase/schema.sql` and report differences before proposing any migration.
-5. Inspect the public-sync workflow and verify that it cannot expose private/licensed NASEM data or overwrite VetRay authentication, user data, or existing database configuration.
+1. Continue from the current `main` branches; do not recreate the existing successful public sync.
+2. Identify the intended Supabase project using the exact Supabase dashboard URL or project reference supplied by the owner.
+3. Inspect project identity, tables, relevant schema, and connectivity read-only; compare live schema with `docs/supabase/schema.sql`.
+4. Review any proposed public build output for private/licensed data, including beyond the workflow's known-marker grep.
+5. Transfer only approved, merged, public-safe FarmProfit changes into `public/farmprofit/`; verify the resulting commit and workflow/build status.
+6. Update this handoff LAST with exact commit/run IDs and any remaining blockers.
 
 **Do not touch / waiting for owner:**
 - Keep `farhad789/farmprofit` private.
-- Never publish licensed/private NASEM feed-library data.
-- Do not overwrite VetRay authentication, user accounts, existing database data, or unrelated application features.
-- Do not run SQL writes, migrations, destructive operations, or production deployment until the owner reviews the findings and explicitly approves the exact change.
-
-**Known problems:**
-- The existing handoff file's literal path ends in a period: `HANDOFF.md.`; the conventional path `HANDOFF.md` does not exist on the checked default branch.
-- Supabase connection is pending, not Active.
-- Earlier code review suggested Supabase client configuration may be incomplete; re-fetch and verify current files before relying on that conclusion.
-- A GitHub Actions run for the relevant public-sync commits has not yet been confirmed.
+- Never publish licensed/private NASEM feed-library data or private seed/answer data without explicit review and approval.
+- Do not overwrite VetRay authentication, user accounts, existing database data, multilingual behavior, or unrelated application features.
+- Do not set Supabase credentials, run SQL writes, migrations, destructive operations, or production deployments until the exact project and change are reviewed and the owner explicitly approves.
+- Do not merge or publish the open draft PR #2 without explicit approval.
 
 ## Decisions already made (do not reopen without the owner)
 - FarmProfit remains private and is the source of truth; VetRay is the public deployment/mirror target.
-- Transfer only explicitly approved public-safe files and changes; preserve VetRay auth, user data, and database.
+- Transfer only explicitly approved public-safe files and changes; preserve VetRay auth, user data, database, and multilingual features.
 - Validate the live Supabase state read-only before any schema or data write.
+- The user asked to continue only the cloud-created changes and save them in the corresponding VetRay repository according to this handoff.
 
-## Owner's last instruction (copy it exactly)
-> دوباره لینک  اتصال به سوپابیس رو برام بفرست  و همون فایل hand-off to vetray  رو اجرا کن
+## Owner's latest instruction
+> You only contiue chang that cloud creat and save in the repo corresponding with hand-off in vetray
 
 ## Log (newest first)
 Format: `YYYY-MM-DD HH:MM | agent name | what I did | files changed | what the next agent should do`
 
+- 2026-11-14 | ChatGPT | Re-read this handoff; verified FarmProfit main at `b6138fc`, successful public-sync run `42389892655`, VetRay public mirror presence, empty Supabase project inventory, blank FarmProfit Supabase client config, and open draft PR #2; no app code, database, or deployment changes made | `HANDOFF.md.` | Owner supplies the exact Supabase dashboard URL/project reference; next agent performs read-only schema inspection, then continues only approved public-safe changes.
 - 2026-11-14 | ChatGPT | Read the VetRay handoff, initiated a new Supabase authorization link, and recorded the verified starting state; no Supabase or application changes made | HANDOFF.md. | Owner completes Supabase authorization; next agent confirms Active status, identifies the exact project, then performs read-only inspection before proposing changes.
 - 2026-11-10 | setup | Created HANDOFF.md | HANDOFF.md | Fill in "Current state" at the first real task
