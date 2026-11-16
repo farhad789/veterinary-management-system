@@ -4,6 +4,9 @@ Any agent (Claude, ChatGPT, Bolt, Grok, or a human) must read this file FIRST an
 
 Keep it short. Rewrite the "Current state" sections each time. Only the Log grows.
 
+## FarmProfit changes: how Bolt gets them
+Bolt cannot read the private repository `farhad789/farmprofit`. So every approved FarmProfit change must be transferred to `main` of `farhad789/veterinary-management-system` (into `public/farmprofit/`, done by the sync workflow). Bolt then reads it from the VetRay repository and publishes it. Always point Bolt at the VetRay repository, never at FarmProfit.
+
 ## Current state
 
 **Goal right now:** Continue the existing FarmProfit-to-VetRay cloud handoff. Keep FarmProfit private, preserve VetRay's existing application/auth/database, and record only verified changes.
@@ -15,7 +18,7 @@ Keep it short. Rewrite the "Current state" sections each time. Only the Log grow
 - VetRay contains the public mirror under `public/farmprofit/`; its directory and expected site files are present. The workflow publishes only the built static site into that directory; its `rsync --delete` is scoped to `vetray/public/farmprofit/`, not the VetRay repository root.
 - The workflow checks the public build for known private NASEM feed-library markers before publishing. This is a guard, not proof that every possible licensed-data leak has been ruled out; do not add private/licensed source data to the public build.
 - FarmProfit `js/config.js` still has empty `SUPABASE_URL` and `SUPABASE_ANON_KEY`; the current site therefore remains in local-only mode.
-- FarmProfit has an open draft PR #2 (`feat/evidence-aware-ration-dialogue`, head `c317849b`). It is not merged into `main` and has not been included in the verified public sync. Do not transfer it unless the owner explicitly approves.
+- FarmProfit PR #2 (`feat/evidence-aware-ration-dialogue`) was approved by the owner and merged into FarmProfit `main` on 2026-11-16 (merge commit `3b48ee6`). The sync run [43864667743](https://github.com/farhad789/farmprofit/actions/runs/43864667743) succeeded and put `61ff7f2` ("Sync public-safe FarmProfit build from private source") on VetRay `main`; the mirror has the new bundle and no private NASEM markers.
 
 **Quiz page (merged 2026-11-14):** Static, self-contained VetRay quiz (Small Animal and Large Animal tracks, 7 cases each, Persian/English) is on `main` at `public/quiz/index.html` (merge commit `c55b001`). No app source, auth, or database files were touched. It is not yet linked from the main site navigation; that decision is still open.
 
@@ -39,7 +42,7 @@ Keep it short. Rewrite the "Current state" sections each time. Only the Log grow
 - Never publish licensed/private NASEM feed-library data or private seed/answer data without explicit review and approval.
 - Do not overwrite VetRay authentication, user accounts, existing database data, multilingual behavior, or unrelated application features.
 - Do not set Supabase credentials, run SQL writes, migrations, destructive operations, or production deployments until the exact project and change are reviewed and the owner explicitly approves.
-- Do not merge or publish the open draft FarmProfit PR #2 without explicit approval.
+- Do not transfer any further FarmProfit change without explicit approval from the owner.
 
 ## Decisions already made (do not reopen without the owner)
 - FarmProfit remains private and is the source of truth; VetRay is the public deployment/mirror target.
@@ -56,6 +59,8 @@ Keep it short. Rewrite the "Current state" sections each time. Only the Log grow
 ## Log (newest first)
 Format: `YYYY-MM-DD HH:MM | agent name | what I did | files changed | what the next agent should do`
 
+- 2026-11-16 | Claude | Owner approved PR #2. It conflicted with FarmProfit `main` and `js/ration.js` had a stray literal backslash-n that broke the module; resolved the conflict (kept the PR's no-NASEM-import version), fixed the stray newline, renumbered the Bolt prompt to 006, ran `npm test` (6 pass) and a public build with the private-marker grep (none), CI green, then merged PR #2 into FarmProfit `main` (`3b48ee6`); sync run `43864667743` succeeded and VetRay `main` has sync commit `61ff7f2` | `HANDOFF.md` | Owner syncs Bolt from VetRay `main`, publishes, and checks `/farmprofit/index.html` (my-ration page, "satisfied" path).
+- 2026-11-16 | Claude | Added the section "FarmProfit changes: how Bolt gets them" because Bolt cannot access the FarmProfit repo; nothing else in this file was changed | `HANDOFF.md.` (renamed to `HANDOFF.md` on 2026-11-16 at the owner's request) | Owner merges this branch; then Bolt syncs from VetRay `main` and publishes.
 - 2026-11-16 | Grok | Verified main state: quiz already merged via PR #2 (commit `c55b001`); FarmProfit main still at `b6138fc`; Supabase still has zero projects visible; updated this handoff to correct outdated "waiting for approval" status | `HANDOFF.md.` | Owner supplies exact Supabase project reference if backend work is next; otherwise decide whether/where to link `/quiz/` in the main app navigation; do not touch open FarmProfit draft PR #2 without approval.
 - 2026-11-16 | Claude | Quiz was merged but not visible on the Bolt site; added a visible quiz link on the landing page (`/quiz/index.html`) on branch `change/quiz-link`; typecheck and build pass and `dist/quiz/index.html` is produced | `src/components/LandingPage.tsx`, `HANDOFF.md.` | Owner merges, then in Bolt syncs from GitHub and publishes; check `/quiz/index.html` on a phone.
 - 2026-11-14 | Claude | Added standalone bilingual quiz page on branch `change/vetray-quiz`; no app code, auth, database, or deployment changes | `public/quiz/index.html`, `HANDOFF.md.` | Owner previews `/quiz/` and approves; then merge to `main` and decide where to link it from the site.
