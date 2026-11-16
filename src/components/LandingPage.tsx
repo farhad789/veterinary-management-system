@@ -119,6 +119,27 @@ export function LandingPage({ lang, onLogin, onTrial }: { lang: Lang; onLogin: (
         </div>
       </section>
 
+      {/* Clinical quiz (static page in public/quiz) */}
+      <section className="max-w-5xl mx-auto px-4 py-8">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h3 className="text-lg font-bold text-white mb-1">
+              {lang === 'fa' ? 'کوییز بالینی کوچک‌دامی و بزرگ‌دامی' : 'Small and large animal clinical quiz'}
+            </h3>
+            <p className="text-slate-400 text-sm">
+              {lang === 'fa' ? '۷ کیس کوتاه برای هر مسیر. پاسخ و توضیح را همان لحظه ببینید.' : '7 short cases per track. See the answer and explanation right away.'}
+            </p>
+          </div>
+          <a
+            href="/quiz/index.html"
+            className="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-3 rounded-xl font-medium transition"
+          >
+            <BookOpen className="w-5 h-5" />
+            {lang === 'fa' ? 'شروع کوییز' : 'Start the quiz'}
+          </a>
+        </div>
+      </section>
+
       {/* Dairy farmers (coming soon) */}
       <DairyFarmerSection lang={lang} />
 
