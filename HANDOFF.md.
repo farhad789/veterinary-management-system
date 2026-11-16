@@ -10,18 +10,17 @@ Keep it short. Rewrite the "Current state" sections each time. Only the Log grow
 
 **Repositories and verified state:**
 - Private source of truth: `farhad789/farmprofit`, default branch `main`, latest observed commit `b6138fc96c46cf819dc28811936731f2fb49794c` (2026-11-07).
-- Public target: `farhad789/veterinary-management-system`, default branch `main`.
+- Public target: `farhad789/veterinary-management-system`, default branch `main`, latest observed commit `c55b0016dc1344edb7a2bfb6b329e847e23908f3` (quiz merge, 2026-11-14).
 - The FarmProfit-to-VetRay GitHub Actions workflow `.github/workflows/sync-public-farmprofit.yml` completed successfully for source commit `b6138fc` (run [42389892655](https://github.com/farhad789/farmprofit/actions/runs/42389892655)).
 - VetRay contains the public mirror under `public/farmprofit/`; its directory and expected site files are present. The workflow publishes only the built static site into that directory; its `rsync --delete` is scoped to `vetray/public/farmprofit/`, not the VetRay repository root.
 - The workflow checks the public build for known private NASEM feed-library markers before publishing. This is a guard, not proof that every possible licensed-data leak has been ruled out; do not add private/licensed source data to the public build.
 - FarmProfit `js/config.js` still has empty `SUPABASE_URL` and `SUPABASE_ANON_KEY`; the current site therefore remains in local-only mode.
 - FarmProfit has an open draft PR #2 (`feat/evidence-aware-ration-dialogue`, head `c317849b`). It is not merged into `main` and has not been included in the verified public sync. Do not transfer it unless the owner explicitly approves.
-- VetRay's latest observed commit is the handoff update; no application source files were changed by this audit.
 
-**Quiz page (2026-11-14):** Static, self-contained VetRay quiz (Small Animal and Large Animal tracks, 7 cases each, Persian/English) added at `public/quiz/index.html` on branch `change/vetray-quiz`. No app source, auth, or database files touched. Not merged to `main`; waiting for owner approval after preview. It is not linked from the site navigation yet.
+**Quiz page (merged 2026-11-14):** Static, self-contained VetRay quiz (Small Animal and Large Animal tracks, 7 cases each, Persian/English) is on `main` at `public/quiz/index.html` (merge commit `c55b001`). No app source, auth, or database files were touched. It is not yet linked from the main site navigation; that decision is still open.
 
 **Supabase status:**
-- Supabase authorization is now Active for the connected account.
+- Supabase authorization is Active for the connected account.
 - The connected account lists organization `Farhad789` (`saxkwotksjqxraismnci`) but lists zero projects. The intended project has not been identified; do not guess a project reference.
 - No live Supabase project, tables, schema, or data were inspected. No SQL was run and no database changes were made.
 - FarmProfit's tracked schema is `docs/supabase/schema.sql`; `docs/supabase/seed-answers.sql` is a separate seed file. Treat seed content as potentially sensitive until reviewed.
@@ -32,28 +31,32 @@ Keep it short. Rewrite the "Current state" sections each time. Only the Log grow
 3. Inspect project identity, tables, relevant schema, and connectivity read-only; compare live schema with `docs/supabase/schema.sql`.
 4. Review any proposed public build output for private/licensed data, including beyond the workflow's known-marker grep.
 5. Transfer only approved, merged, public-safe FarmProfit changes into `public/farmprofit/`; verify the resulting commit and workflow/build status.
-6. Update this handoff LAST with exact commit/run IDs and any remaining blockers.
+6. Optionally link `/quiz/` from the main VetRay navigation once the owner decides placement.
+7. Update this handoff LAST with exact commit/run IDs and any remaining blockers.
 
 **Do not touch / waiting for owner:**
 - Keep `farhad789/farmprofit` private.
 - Never publish licensed/private NASEM feed-library data or private seed/answer data without explicit review and approval.
 - Do not overwrite VetRay authentication, user accounts, existing database data, multilingual behavior, or unrelated application features.
 - Do not set Supabase credentials, run SQL writes, migrations, destructive operations, or production deployments until the exact project and change are reviewed and the owner explicitly approves.
-- Do not merge or publish the open draft PR #2 without explicit approval.
+- Do not merge or publish the open draft FarmProfit PR #2 without explicit approval.
 
 ## Decisions already made (do not reopen without the owner)
 - FarmProfit remains private and is the source of truth; VetRay is the public deployment/mirror target.
 - Transfer only explicitly approved public-safe files and changes; preserve VetRay auth, user data, database, and multilingual features.
 - Validate the live Supabase state read-only before any schema or data write.
 - The user asked to continue only the cloud-created changes and save them in the corresponding VetRay repository according to this handoff.
+- The bilingual clinical quiz is approved and lives on `main` under `public/quiz/`.
 
 ## Owner's latest instruction
 > You only contiue chang that cloud creat and save in the repo corresponding with hand-off in vetray
 > (2026-11-14) Push the VetRay small/large animal quiz to GitHub in VetRay (veterinary-management-system).
+> (current session) Continue development directly against the GitHub repositories; GitHub-first, commit and push approved changes.
 
 ## Log (newest first)
 Format: `YYYY-MM-DD HH:MM | agent name | what I did | files changed | what the next agent should do`
 
+- 2026-11-16 | Grok | Verified main state: quiz already merged via PR #2 (commit `c55b001`); FarmProfit main still at `b6138fc`; Supabase still has zero projects visible; updated this handoff to correct outdated "waiting for approval" status | `HANDOFF.md.` | Owner supplies exact Supabase project reference if backend work is next; otherwise decide whether/where to link `/quiz/` in the main app navigation; do not touch open FarmProfit draft PR #2 without approval.
 - 2026-11-14 | Claude | Added standalone bilingual quiz page on branch `change/vetray-quiz`; no app code, auth, database, or deployment changes | `public/quiz/index.html`, `HANDOFF.md.` | Owner previews `/quiz/` and approves; then merge to `main` and decide where to link it from the site.
 - 2026-11-14 | ChatGPT | Re-read this handoff; verified FarmProfit main at `b6138fc`, successful public-sync run `42389892655`, VetRay public mirror presence, empty Supabase project inventory, blank FarmProfit Supabase client config, and open draft PR #2; no app code, database, or deployment changes made | `HANDOFF.md.` | Owner supplies the exact Supabase dashboard URL/project reference; next agent performs read-only schema inspection, then continues only approved public-safe changes.
 - 2026-11-14 | ChatGPT | Read the VetRay handoff, initiated a new Supabase authorization link, and recorded the verified starting state; no Supabase or application changes made | HANDOFF.md. | Owner completes Supabase authorization; next agent confirms Active status, identifies the exact project, then performs read-only inspection before proposing changes.
