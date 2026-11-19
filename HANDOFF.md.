@@ -21,6 +21,10 @@ Keep it short. Rewrite the "Current state" sections each time. Only the Log grow
 
 **Farmer and pet-owner pages (branch `change/farmer-and-pet-landing-copy`, not merged):** Two static Persian RTL pages at `public/farmers/index.html` and `public/pets/index.html` (headline, intro, one WhatsApp button, link to the other page). The button is hidden until the owner sets `WHATSAPP_NUMBER` at the bottom of each file (digits with country code); no number exists in the repo and none was guessed. The "free checklist/guide" offer from the draft copy was left off the pages because those files do not exist yet. WhatsApp and Instagram texts are saved in `docs/social-messages.md` (not published). Build passes and `dist/farmers/` and `dist/pets/` are produced. Not yet linked from the main site. Owner should review the subheadline claim on `/farmers/` ("less losses, more profit") against CLAUDE.md's rule on claims.
 
+**Glass dashboard showcase (branch `change/glass-dashboard-showcase`, design only, NOT built):** Owner shared a farm-dashboard video (dark frosted-glass cards, KPI tiles, donut and bar charts, slow zoom) and wants the same look for VetRay, in three outputs from ONE component set: a live landing-page section, mockup images, and short Instagram clips. Approach approved by owner: one component set, three outputs. Design doc: `docs/superpowers/specs/2026-11-18-glass-dashboard-showcase-design.md` (waiting for owner approval; nothing built, no app code changed). Owner has seen throwaway previews (not in the repo) of: herd overview, ration cost and animal performance, and a phone flow (practical advice, then "are you satisfied?"; satisfied = nothing more, not satisfied = one WhatsApp button). Owner has not yet picked which one(s) go live. Rules kept: teal accent (not the video's lime), no photo backdrop (field texture drawn in code), no autoplay video, sample numbers labelled "نمونه", no drug names or doses, one CTA per screen, no new libraries. The video itself has no research or data source behind it (concept design; numbers are placeholders), so nothing from it is treated as data.
+
+**Knowledge base process (owner's order, important):** 1) practical skill from farmers, veterinarians and veterinary nutritionists, 2) theory from professional books (NASEM 2021, 8th Revised Edition, National Academies Press, is the core reference; the older NRC 2001 edition is superseded), 3) real market data (feed prices must be dated, sourced and verified). Step 1 started: a Persian interview for Dr. Riazi is at https://claude.ai/artifact/2fmrEFmyJEY81e8W1w5iUW (waiting for his answers). Step 3 blocker: price pages (Tahlil Bazaar, Nabz Gheymat) block automated reading and the Forsat page shows no prices; the commodity exchange site (ime.co.ir) is not reachable from the cloud agent. No price has been verified; do not invent any. Owner can paste a daily price report or send official pages.
+
 **Supabase status:**
 - Supabase authorization is Active for the connected account.
 - The connected account lists organization `Farhad789` (`saxkwotksjqxraismnci`) but lists zero projects. The intended project has not been identified; do not guess a project reference.
@@ -28,6 +32,7 @@ Keep it short. Rewrite the "Current state" sections each time. Only the Log grow
 - FarmProfit's tracked schema is `docs/supabase/schema.sql`; `docs/supabase/seed-answers.sql` is a separate seed file. Treat seed content as potentially sensitive until reviewed.
 
 **Next steps (in order):**
+0. Glass dashboard showcase: owner approves the design doc and picks the live section (herd overview, ration cost and performance, advice flow, or a combination); then write the plan and build on `change/glass-dashboard-showcase`. Owner answers the skill interview; then record answers as rules with source, compare with NASEM 2021.
 1. Continue from the current `main` branches; do not recreate the existing successful public sync.
 2. Identify the intended Supabase project using the exact Supabase dashboard URL or project reference supplied by the owner.
 3. Inspect project identity, tables, relevant schema, and connectivity read-only; compare live schema with `docs/supabase/schema.sql`.
@@ -51,6 +56,8 @@ Keep it short. Rewrite the "Current state" sections each time. Only the Log grow
 - The bilingual clinical quiz is approved and lives on `main` under `public/quiz/`.
 
 ## Owner's latest instruction
+> (2026-11-19) Continue and update GitHub so I can see it in Bolt, in line with this handoff.
+> (2026-11-18) Make designs like the shared video for the site, based on the site; build the knowledge in this order: skill, then theory, then data.
 > You only contiue chang that cloud creat and save in the repo corresponding with hand-off in vetray
 > (2026-11-14) Push the VetRay small/large animal quiz to GitHub in VetRay (veterinary-management-system).
 > (current session) Continue development directly against the GitHub repositories; GitHub-first, commit and push approved changes.
@@ -58,6 +65,7 @@ Keep it short. Rewrite the "Current state" sections each time. Only the Log grow
 ## Log (newest first)
 Format: `YYYY-MM-DD HH:MM | agent name | what I did | files changed | what the next agent should do`
 
+- 2026-11-19 | Claude | Recorded the glass dashboard showcase design (not built), the knowledge-base order (skill, theory, data) and the price-data blocker; pushed branch and opened a PR for the owner to merge; no app code, auth, database or deployment changes | `HANDOFF.md.`, `notes/decisions.md`, `docs/superpowers/specs/2026-11-18-glass-dashboard-showcase-design.md` | Owner merges the PR, then in Bolt syncs from GitHub; owner approves the design doc and picks the live section; owner answers the skill interview; do not build before approval.
 - 2026-11-17 | Claude | Added farmer and pet-owner landing pages and social message texts on branch `change/farmer-and-pet-landing-copy`; no app code, auth, database, or deployment changes; build passes | `public/farmers/index.html`, `public/pets/index.html`, `docs/social-messages.md`, `HANDOFF.md.` | Owner gives the WhatsApp number (set `WHATSAPP_NUMBER` in both pages), previews `/farmers/` and `/pets/` on a phone, then merges; in Bolt sync from GitHub and publish. Decide where to link them from the site.
 - 2026-11-16 | Grok | Verified main state: quiz already merged via PR #2 (commit `c55b001`); FarmProfit main still at `b6138fc`; Supabase still has zero projects visible; updated this handoff to correct outdated "waiting for approval" status | `HANDOFF.md.` | Owner supplies exact Supabase project reference if backend work is next; otherwise decide whether/where to link `/quiz/` in the main app navigation; do not touch open FarmProfit draft PR #2 without approval.
 - 2026-11-16 | Claude | Quiz was merged but not visible on the Bolt site; added a visible quiz link on the landing page (`/quiz/index.html`) on branch `change/quiz-link`; typecheck and build pass and `dist/quiz/index.html` is produced | `src/components/LandingPage.tsx`, `HANDOFF.md.` | Owner merges, then in Bolt syncs from GitHub and publishes; check `/quiz/index.html` on a phone.
